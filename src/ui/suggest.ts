@@ -4,9 +4,9 @@ import { wrapAround } from "src/settings/utils";
 
 class Suggest<T> {
   private owner: ISuggestOwner<T>;
-  private values: T[];
-  private suggestions: HTMLDivElement[];
-  private selectedItem: number;
+  private values!: T[];
+  private suggestions!: HTMLElement[];
+  private selectedItem!: number;
   private containerEl: HTMLElement;
 
   constructor(owner: ISuggestOwner<T>, containerEl: HTMLElement, scope: Scope) {
@@ -46,7 +46,7 @@ class Suggest<T> {
     });
   }
 
-  onSuggestionClick(event: MouseEvent, el: HTMLDivElement): void {
+  onSuggestionClick(event: MouseEvent, el: HTMLElement): void {
     event.preventDefault();
 
     const item = this.suggestions.indexOf(el);
@@ -54,14 +54,14 @@ class Suggest<T> {
     this.useSelectedItem(event);
   }
 
-  onSuggestionMouseover(_event: MouseEvent, el: HTMLDivElement): void {
+  onSuggestionMouseover(_event: MouseEvent, el: HTMLElement): void {
     const item = this.suggestions.indexOf(el);
     this.setSelectedItem(item, false);
   }
 
   setSuggestions(values: T[]) {
     this.containerEl.empty();
-    const suggestionEls: HTMLDivElement[] = [];
+    const suggestionEls: HTMLElement[] = [];
 
     values.forEach((value) => {
       const suggestionEl = this.containerEl.createDiv("suggestion-item");
@@ -101,7 +101,7 @@ export abstract class TextInputSuggest<T> implements ISuggestOwner<T> {
   protected app: App;
   protected inputEl: HTMLInputElement;
 
-  private popper: PopperInstance;
+  private popper!: PopperInstance;
   private scope: Scope;
   private suggestEl: HTMLElement;
   private suggest: Suggest<T>;

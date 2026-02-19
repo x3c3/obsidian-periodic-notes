@@ -24,9 +24,9 @@ interface FileOptionsItem {
 export class FileOptionsSwitcher extends SuggestModal<FileOptionsItem> {
   nlDatesPlugin: NLDatesPlugin;
 
-  granularityLabel: HTMLElement;
-  dailyNotes: Record<string, TFile>;
-  scope: Scope;
+  granularityLabel!: HTMLElement;
+  dailyNotes!: Record<string, TFile>;
+  override scope!: Scope;
 
   constructor(app: App) {
     super(app);

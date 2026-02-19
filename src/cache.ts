@@ -71,7 +71,11 @@ export class PeriodicNotesCache extends Component {
     this.app.workspace.onLayoutReady(() => {
       console.info("[Periodic Notes] initializing cache");
       this.initialize();
-      this.registerEvent(this.app.vault.on("create", this.resolve, this));
+      this.registerEvent(
+        this.app.vault.on("create", (file) => {
+          if (file instanceof TFile) this.resolve(file, "create");
+        }),
+      );
       this.registerEvent(this.app.vault.on("rename", this.resolveRename, this));
       this.registerEvent(
         this.app.metadataCache.on("changed", this.resolveChangedMetadata, this),
@@ -120,7 +124,7 @@ export class PeriodicNotesCache extends Component {
         memoizedRecurseChildren(rootFolder, (file: TAbstractFile) => {
           if (file instanceof TFile) {
             this.resolve(file, "initialize");
-            const metadata = app.metadataCache.getFileCache(file);
+            const metadata = this.app.metadataCache.getFileCache(file);
             if (metadata) {
               this.resolveChangedMetadata(file, "", metadata);
             }
@@ -238,7 +242,7 @@ export class PeriodicNotesCache extends Component {
           this.set(calendarSet.id, file.path, metadata);
 
           if (reason === "create" && file.stat.size === 0) {
-            applyPeriodicTemplateToFile(app, file, calendarSet, metadata);
+            applyPeriodicTemplateToFile(this.app, file, calendarSet, metadata);
           }
 
           this.app.workspace.trigger(

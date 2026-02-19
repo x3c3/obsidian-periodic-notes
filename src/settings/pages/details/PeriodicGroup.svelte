@@ -27,25 +27,21 @@
     settings,
     ($settings) =>
       $settings.calendarSets.find((set) => set.id === calendarSetId)!,
-    {
-      withOld(reflecting, $settings) {
-        const idx = $settings.calendarSets.findIndex(
-          (set) => set.id === calendarSetId
-        );
-        $settings.calendarSets[idx] = reflecting;
-        return $settings;
-      },
-    }
+    (reflecting, $settings) => {
+      const idx = $settings.calendarSets.findIndex(
+        (set) => set.id === calendarSetId,
+      );
+      $settings.calendarSets[idx] = reflecting;
+      return $settings;
+    },
   );
   let config = writableDerived(
     calendarSet,
     ($calendarSet) => $calendarSet?.[granularity] ?? DEFAULT_PERIODIC_CONFIG,
-    {
-      withOld(reflecting, $calendarSet) {
-        $calendarSet[granularity] = reflecting;
-        return $calendarSet;
-      },
-    }
+    (reflecting, $calendarSet) => {
+      $calendarSet[granularity] = reflecting;
+      return $calendarSet;
+    },
   );
 
   function toggleExpand() {

@@ -12,7 +12,7 @@ const DEFAULT_INSTRUCTIONS = [
 ];
 
 export class RelatedFilesSwitcher extends SuggestModal<DateNavigationItem> {
-  private inputLabel: HTMLElement;
+  private inputLabel!: HTMLElement;
   private includeFinerGranularities: boolean;
 
   constructor(

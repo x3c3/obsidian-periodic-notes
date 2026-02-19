@@ -42,8 +42,6 @@ export const DEFAULT_SETTINGS: ISettings = {
   enableTimelineComplication: true,
 
   // Localization
-  localeOverride: "system-default",
-  weekStart: "locale" as IWeekStartOption,
 };
 
 export const DEFAULT_PERIODIC_CONFIG: PeriodicConfig = Object.freeze({
@@ -56,7 +54,7 @@ export const DEFAULT_PERIODIC_CONFIG: PeriodicConfig = Object.freeze({
 });
 
 export class PeriodicNotesSettingsTab extends PluginSettingTab {
-  private view: SvelteComponent;
+  private view!: SvelteComponent;
 
   constructor(
     readonly app: App,

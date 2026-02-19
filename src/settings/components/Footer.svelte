@@ -1,3 +1,5 @@
+<script lang="ts"></script>
+
 <div class="footer">
   <div class="footer-description">made by Liam Cain</div>
   <a href="https://www.buymeacoffee.com/liamcain">

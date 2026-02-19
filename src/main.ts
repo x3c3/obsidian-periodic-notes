@@ -48,12 +48,12 @@ interface IOpenOpts {
 }
 
 export default class PeriodicNotesPlugin extends Plugin {
-  public settings: Writable<ISettings>;
-  private ribbonEl: HTMLElement | null;
+  public settings!: Writable<ISettings>;
+  private ribbonEl!: HTMLElement | null;
 
-  private cache: PeriodicNotesCache;
-  public calendarSetManager: CalendarSetManager;
-  private timelineManager: TimelineManager;
+  private cache!: PeriodicNotesCache;
+  public calendarSetManager!: CalendarSetManager;
+  private timelineManager!: TimelineManager;
 
   unload(): void {
     super.unload();
@@ -182,7 +182,7 @@ export default class PeriodicNotesPlugin extends Plugin {
             migrateLegacySettingsToCalendarSet(settings),
           ),
         );
-      } else if (hasLegacyDailyNoteSettings(app)) {
+      } else if (hasLegacyDailyNoteSettings(this.app)) {
         this.settings.update(
           createNewCalendarSet(
             DEFAULT_CALENDARSET_ID,

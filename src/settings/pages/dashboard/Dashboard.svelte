@@ -18,6 +18,7 @@
   import {
     configureGlobalMomentLocale,
     type ILocalizationSettings,
+    type IWeekStartOption,
   } from "src/settings/localization";
 
   import GettingStartedBanner from "./GettingStartedBanner.svelte";
@@ -104,7 +105,7 @@
     options={getWeekStartOptions()}
     value={$localization.weekStart}
     onChange={(e) => {
-      const val = e.target.value;
+      const val = (e.target as HTMLSelectElement).value as IWeekStartOption;
       $localization.weekStart = val;
       app.vault.setConfig("weekStart", val); // private API: vault.setConfig is undocumented
     }}
@@ -122,7 +123,7 @@
     options={getLocaleOptions()}
     value={$localization.localeOverride}
     onChange={(e) => {
-      const val = e.target.value;
+      const val = (e.target as HTMLSelectElement).value;
       $localization.localeOverride = val;
       app.vault.setConfig("weekStart", val); // private API: vault.setConfig is undocumented
     }}
