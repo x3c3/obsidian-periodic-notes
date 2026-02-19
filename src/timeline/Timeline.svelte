@@ -13,30 +13,34 @@
   import { getRelativeDate } from "src/utils";
   import RelativeIcon from "./RelativeIcon.svelte";
 
-  export let plugin: PeriodicNotesPlugin;
-  export let cache: PeriodicNotesCache;
-  export let view: MarkdownView;
+  let { plugin, cache, view }: {
+    plugin: PeriodicNotesPlugin;
+    cache: PeriodicNotesCache;
+    view: MarkdownView;
+  } = $props();
 
-  let showTimeline: boolean;
-  let weekDays: Moment[];
+  let showTimeline = $state(false);
+  let weekDays = $state<Moment[]>([]);
   let today = window.moment();
-  let periodicData: PeriodicNoteCachedMetadata | null;
-  let relativeDataStr: string;
+  let periodicData = $state<PeriodicNoteCachedMetadata | null>(null);
+  let relativeDataStr = $state("");
 
-  let settings = plugin.settings;
-  let showComplication = $settings.enableTimelineComplication;
+  let settings = $derived(plugin.settings);
+  let showComplication = $state($settings.enableTimelineComplication);
 
-  $: {
+  function updateView() {
     periodicData = cache.find(view.file?.path);
 
     if (periodicData) {
       weekDays = generateWeekdays(today, periodicData.date);
       relativeDataStr = getRelativeDate(
         periodicData.granularity,
-        periodicData.date
+        periodicData.date,
       );
     }
   }
+
+  updateView();
 
   function generateWeekdays(_today: Moment, selectedDate: Moment) {
     let days: Moment[] = [];
@@ -51,12 +55,12 @@
 
   async function openPeriodicNoteInView(
     granularity: Granularity,
-    date: Moment
+    date: Moment,
   ) {
     let file = cache.getPeriodicNote(
       plugin.calendarSetManager.getActiveId(),
       granularity,
-      date
+      date,
     );
     if (!file) {
       file = await plugin.createPeriodicNote(granularity, date);
@@ -72,35 +76,29 @@
     showTimeline = !showTimeline;
   }
 
-  function updateView() {
-    periodicData = cache.find(view.file?.path);
-
-    if (periodicData) {
-      weekDays = generateWeekdays(today, periodicData.date);
-      relativeDataStr = getRelativeDate(
-        periodicData.granularity,
-        periodicData.date
-      );
-    }
-  }
-
   onMount(() => {
     plugin.registerEvent(plugin.app.workspace.on("file-open", updateView));
     plugin.registerEvent(
-      plugin.app.workspace.on("periodic-notes:resolve", updateView)
+      plugin.app.workspace.on("periodic-notes:resolve", updateView),
     );
     plugin.registerEvent(
       plugin.app.workspace.on(
         "periodic-notes:settings-updated",
-        updateComplicationVisibility
-      )
+        updateComplicationVisibility,
+      ),
     );
   });
 </script>
 
 {#if showComplication && periodicData}
   <div class="timeline-container">
-    <div class="leaf-periodic-button" role="button" tabindex="0" on:click={toggleCalendarVisibility} on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') toggleCalendarVisibility(); }}>
+    <div
+      class="leaf-periodic-button"
+      role="button"
+      tabindex="0"
+      onclick={toggleCalendarVisibility}
+      onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') toggleCalendarVisibility(); }}
+    >
       {#if periodicData.matchData.exact === false}
         <RelativeIcon />
       {/if}
@@ -121,8 +119,8 @@
               class="timeline-day"
               role="button"
               tabindex="0"
-              on:click={() => openPeriodicNoteInView("day", weekDay)}
-              on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') openPeriodicNoteInView("day", weekDay); }}
+              onclick={() => openPeriodicNoteInView("day", weekDay)}
+              onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') openPeriodicNoteInView("day", weekDay); }}
             >
               {weekDay.format("DD")}
             </div>

@@ -1,20 +1,17 @@
 <script lang="ts">
   import type { App } from "obsidian";
-  import { onMount } from "svelte";
   import type { Readable } from "svelte/store";
   import capitalize from "lodash/capitalize";
 
   import type { Granularity, PeriodicConfig } from "src/types";
   import { FileSuggest } from "src/ui/file-suggest";
-
-  import { validateTemplate } from "../validation";
   import { displayConfigs } from "src/commands";
 
-  export let app: App;
-  export let granularity: Granularity;
-  export let config: Readable<PeriodicConfig>;
+  import { validateTemplate } from "../validation";
 
-  let error: string;
+  let { app, granularity, config }: { app: App; granularity: Granularity; config: Readable<PeriodicConfig> } = $props();
+
+  let error = $state("");
   let inputEl: HTMLInputElement;
 
   function validateOnBlur() {
@@ -25,7 +22,7 @@
     error = "";
   }
 
-  onMount(() => {
+  $effect(() => {
     error = validateTemplate(app, inputEl.value);
     new FileSuggest(app, inputEl);
   });
@@ -51,8 +48,8 @@
       placeholder="e.g. templates/template-file"
       bind:value={$config.templatePath}
       bind:this={inputEl}
-      on:change={validateOnBlur}
-      on:input={clearError}
+      onchange={validateOnBlur}
+      oninput={clearError}
     />
   </div>
 </div>

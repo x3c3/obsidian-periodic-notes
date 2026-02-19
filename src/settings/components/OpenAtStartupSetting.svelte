@@ -9,9 +9,7 @@
   import type { ISettings } from "..";
   import { clearStartupNote } from "../utils";
 
-  export let config: Writable<PeriodicConfig>;
-  export let settings: Writable<ISettings>;
-  export let granularity: Granularity;
+  let { config, settings, granularity }: { config: Writable<PeriodicConfig>; settings: Writable<ISettings>; granularity: Granularity } = $props();
 </script>
 
 <SettingItem
@@ -20,12 +18,13 @@
   type="toggle"
   isHeading={false}
 >
-  <Toggle
-    slot="control"
-    isEnabled={$config.openAtStartup}
-    onChange={(val) => {
-      settings.update(clearStartupNote);
-      $config.openAtStartup = val;
-    }}
-  />
+  {#snippet control()}
+    <Toggle
+      isEnabled={$config.openAtStartup}
+      onChange={(val) => {
+        settings.update(clearStartupNote);
+        $config.openAtStartup = val;
+      }}
+    />
+  {/snippet}
 </SettingItem>

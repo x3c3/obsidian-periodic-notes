@@ -1,6 +1,5 @@
 <script lang="ts">
   import { Menu, setIcon } from "obsidian";
-  import { onMount } from "svelte";
   import type { Writable } from "svelte/store";
   import capitalize from "lodash/capitalize";
 
@@ -17,10 +16,12 @@
     setActiveSet,
   } from "src/settings/utils";
 
-  export let viewDetails: () => void;
-  export let calendarSet: CalendarSet;
-  export let manager: CalendarSetManager;
-  export let settings: Writable<ISettings>;
+  let { viewDetails, calendarSet, manager, settings }: {
+    viewDetails: () => void;
+    calendarSet: CalendarSet;
+    manager: CalendarSetManager;
+    settings: Writable<ISettings>;
+  } = $props();
 
   let optionsEl: HTMLDivElement;
   let showEmptyState =
@@ -75,7 +76,7 @@
     }
   }
 
-  onMount(() => {
+  $effect(() => {
     setIcon(optionsEl, "more-vertical");
   });
 </script>
@@ -85,8 +86,8 @@
   class:active={calendarSet.id === $settings.activeCalendarSet}
   role="button"
   tabindex="0"
-  on:click={viewDetails}
-  on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') viewDetails(); }}
+  onclick={viewDetails}
+  onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') viewDetails(); }}
 >
   <div class="calendarset-titlebar">
     <h4 class="calendarset-name">{calendarSet.id}</h4>
@@ -95,8 +96,8 @@
       bind:this={optionsEl}
       role="button"
       tabindex="0"
-      on:click|stopPropagation={toggleOptionsMenu}
-      on:keydown|stopPropagation={(e) => { if (e.key === 'Enter' || e.key === ' ') toggleOptionsMenu(e); }}
+      onclick={(e) => { e.stopPropagation(); toggleOptionsMenu(e); }}
+      onkeydown={(e) => { e.stopPropagation(); if (e.key === 'Enter' || e.key === ' ') toggleOptionsMenu(e); }}
     ></div>
   </div>
   <div class="included-types">

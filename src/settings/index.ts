@@ -1,7 +1,7 @@
 import { type App, PluginSettingTab } from "obsidian";
 import { DEFAULT_CALENDARSET_ID } from "src/calendarSetManager";
 import type { CalendarSet, PeriodicConfig } from "src/types";
-import type { SvelteComponent } from "svelte";
+import { mount, unmount } from "svelte";
 
 import type WeeklyNotesPlugin from "../main";
 import SettingsRouter from "./pages/Router.svelte";
@@ -54,7 +54,7 @@ export const DEFAULT_PERIODIC_CONFIG: PeriodicConfig = Object.freeze({
 });
 
 export class PeriodicNotesSettingsTab extends PluginSettingTab {
-  private view!: SvelteComponent;
+  private view!: Record<string, never>;
 
   constructor(
     readonly app: App,
@@ -67,7 +67,7 @@ export class PeriodicNotesSettingsTab extends PluginSettingTab {
   display(): void {
     this.containerEl.empty();
 
-    this.view = new SettingsRouter({
+    this.view = mount(SettingsRouter, {
       target: this.containerEl,
       props: {
         app: this.app,
@@ -79,6 +79,6 @@ export class PeriodicNotesSettingsTab extends PluginSettingTab {
 
   hide() {
     super.hide();
-    this.view.$destroy();
+    unmount(this.view);
   }
 }

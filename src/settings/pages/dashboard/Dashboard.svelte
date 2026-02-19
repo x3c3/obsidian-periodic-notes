@@ -1,6 +1,5 @@
 <script lang="ts">
-  import { App, setIcon } from "obsidian";
-  import { onMount } from "svelte";
+  import { type App, setIcon } from "obsidian";
   import type { Writable } from "svelte/store";
 
   import CalendarSetManager from "src/calendarSetManager";
@@ -24,10 +23,12 @@
   import GettingStartedBanner from "./GettingStartedBanner.svelte";
   import CalendarSetMenuItem from "./CalendarSets/MenuItem.svelte";
 
-  export let app: App;
-  export let manager: CalendarSetManager;
-  export let localization: Writable<ILocalizationSettings>;
-  export let settings: Writable<ISettings>;
+  let { app, manager, localization, settings }: {
+    app: App;
+    manager: CalendarSetManager;
+    localization: Writable<ILocalizationSettings>;
+    settings: Writable<ISettings>;
+  } = $props();
 
   let addEl: HTMLElement;
 
@@ -44,7 +45,7 @@
     });
   }
 
-  onMount(() => {
+  $effect(() => {
     setIcon(addEl, "plus");
   });
 </script>
@@ -60,7 +61,7 @@
 
 <div class="section-nav">
   <h3 class="section-title">Calendar Sets</h3>
-  <div class="clickable-icon" bind:this={addEl} role="button" tabindex="0" on:click={addCalendarset} on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') addCalendarset(); }}></div>
+  <div class="clickable-icon" bind:this={addEl} role="button" tabindex="0" onclick={addCalendarset} onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') addCalendarset(); }}></div>
 </div>
 <div class="calendarset-container">
   {#each $settings.calendarSets as calendarSet}
@@ -74,18 +75,19 @@
 </div>
 
 <SettingItem
-  name="Show “Timeline” complication on periodic notes"
+  name="Show &ldquo;Timeline&rdquo; complication on periodic notes"
   description="Adds a collapsible timeline to the top-right of all periodic notes"
   type="toggle"
   isHeading={false}
 >
-  <Toggle
-    slot="control"
-    isEnabled={$settings.enableTimelineComplication}
-    onChange={(val) => {
-      $settings.enableTimelineComplication = val;
-    }}
-  />
+  {#snippet control()}
+    <Toggle
+      isEnabled={$settings.enableTimelineComplication}
+      onChange={(val) => {
+        $settings.enableTimelineComplication = val;
+      }}
+    />
+  {/snippet}
 </SettingItem>
 
 <h3>Localization</h3>
@@ -99,16 +101,17 @@
   type="dropdown"
   isHeading={false}
 >
-  <Dropdown
-    slot="control"
-    options={getWeekStartOptions()}
-    value={$localization.weekStart}
-    onChange={(e) => {
-      const val = (e.target as HTMLSelectElement).value as IWeekStartOption;
-      $localization.weekStart = val;
-      app.vault.setConfig("weekStart", val); // private API: vault.setConfig is undocumented
-    }}
-  />
+  {#snippet control()}
+    <Dropdown
+      options={getWeekStartOptions()}
+      value={$localization.weekStart}
+      onChange={(e) => {
+        const val = (e.target as HTMLSelectElement).value as IWeekStartOption;
+        $localization.weekStart = val;
+        app.vault.setConfig("weekStart", val);
+      }}
+    />
+  {/snippet}
 </SettingItem>
 
 <SettingItem
@@ -117,16 +120,17 @@
   type="dropdown"
   isHeading={false}
 >
-  <Dropdown
-    slot="control"
-    options={getLocaleOptions()}
-    value={$localization.localeOverride}
-    onChange={(e) => {
-      const val = (e.target as HTMLSelectElement).value;
-      $localization.localeOverride = val;
-      app.vault.setConfig("weekStart", val); // private API: vault.setConfig is undocumented
-    }}
-  />
+  {#snippet control()}
+    <Dropdown
+      options={getLocaleOptions()}
+      value={$localization.localeOverride}
+      onChange={(e) => {
+        const val = (e.target as HTMLSelectElement).value;
+        $localization.localeOverride = val;
+        app.vault.setConfig("weekStart", val);
+      }}
+    />
+  {/snippet}
 </SettingItem>
 
 <Footer />

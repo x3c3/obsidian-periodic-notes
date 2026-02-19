@@ -1,12 +1,11 @@
 <script lang="ts">
   import { setIcon } from "obsidian";
-  import { onMount } from "svelte";
 
-  export let isExpanded: boolean;
+  let { isExpanded }: { isExpanded: boolean } = $props();
 
   let arrowEl: HTMLElement;
 
-  onMount(() => {
+  $effect(() => {
     setIcon(arrowEl, "chevron-right");
   });
 </script>

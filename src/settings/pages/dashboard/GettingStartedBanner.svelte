@@ -7,19 +7,13 @@
   } from "src/settings/utils";
   import { slide } from "svelte/transition";
 
-  export let app: App;
-  export let handleTeardown: () => void;
+  let { app, handleTeardown }: { app: App; handleTeardown: () => void } = $props();
 
-  let hasDailyNotesEnabled: boolean;
-  let hasDailyNoteSettings: boolean;
-
-  $: {
-    hasDailyNotesEnabled = isDailyNotesPluginEnabled(app);
-    hasDailyNoteSettings = hasLegacyDailyNoteSettings(app);
-  }
+  let hasDailyNotesEnabled = $derived(isDailyNotesPluginEnabled(app));
+  let hasDailyNoteSettings = $derived(hasLegacyDailyNoteSettings(app));
 </script>
 
-<div out:slide|local class="settings-banner">
+<div out:slide class="settings-banner">
   <h3>Getting Started</h3>
 
   {#if hasDailyNotesEnabled}
@@ -36,7 +30,7 @@
         </p>
       </div>
       <div class="setting-item-control">
-        <button class="mod-cta" on:click={() => disableDailyNotesPlugin(app)}>
+        <button class="mod-cta" onclick={() => disableDailyNotesPlugin(app)}>
           Disable
         </button>
       </div>
@@ -50,7 +44,7 @@
     </p>
   {/if}
 
-  <button on:click={handleTeardown}>Dismiss</button>
+  <button onclick={handleTeardown}>Dismiss</button>
 </div>
 
 <style>

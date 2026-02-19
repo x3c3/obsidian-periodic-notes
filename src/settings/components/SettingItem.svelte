@@ -1,8 +1,13 @@
 <script lang="ts">
-  export let name: string;
-  export let description: string;
-  export let isHeading: boolean;
-  export let type: "dropdown" | "toggle";
+  import type { Snippet } from "svelte";
+
+  let { name, description, isHeading, type, control }: {
+    name: string;
+    description: string;
+    isHeading: boolean;
+    type: "dropdown" | "toggle";
+    control?: Snippet;
+  } = $props();
 </script>
 
 <div
@@ -23,6 +28,6 @@
     {/if}
   </div>
   <div class="setting-item-control">
-    <slot name="control" />
+    {@render control?.()}
   </div>
 </div>

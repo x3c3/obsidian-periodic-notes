@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { App } from "obsidian";
+  import type { App } from "obsidian";
   import { slide } from "svelte/transition";
   import capitalize from "lodash/capitalize";
 
@@ -15,14 +15,17 @@
   import writableDerived from "svelte-writable-derived";
   import OpenAtStartupSetting from "src/settings/components/OpenAtStartupSetting.svelte";
 
-  export let app: App;
-  export let calendarSetId: string;
-  export let granularity: Granularity;
-  export let settings: Writable<ISettings>;
+  let { app, calendarSetId, granularity, settings }: {
+    app: App;
+    calendarSetId: string;
+    granularity: Granularity;
+    settings: Writable<ISettings>;
+  } = $props();
 
-  let displayConfig = displayConfigs[granularity];
-  let isExpanded = false;
+  let displayConfig = $derived(displayConfigs[granularity]);
+  let isExpanded = $state(false);
 
+  // svelte-ignore state_referenced_locally
   let calendarSet = writableDerived(
     settings,
     ($settings) =>
@@ -54,8 +57,8 @@
     class="setting-item setting-item-heading periodic-group-heading"
     role="button"
     tabindex="0"
-    on:click={toggleExpand}
-    on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') toggleExpand(); }}
+    onclick={toggleExpand}
+    onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') toggleExpand(); }}
   >
     <div class="setting-item-info">
       <h3 class="setting-item-name periodic-group-title">
@@ -82,8 +85,8 @@
   {#if isExpanded}
     <div
       class="periodic-group-content"
-      in:slide|local={{ duration: 300 }}
-      out:slide|local={{ duration: 300 }}
+      in:slide={{ duration: 300 }}
+      out:slide={{ duration: 300 }}
     >
       <NoteFormatSetting {config} {granularity} />
       <NoteFolderSetting {app} {config} {granularity} />

@@ -1,27 +1,22 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import type { Readable } from "svelte/store";
 
   import { DEFAULT_FORMAT } from "src/constants";
   import type { Granularity, PeriodicConfig } from "src/types";
-  import { validateFormat, validateFormatComplexity } from "../validation";
-  import type { Readable } from "svelte/store";
   import { displayConfigs } from "src/commands";
 
-  export let granularity: Granularity;
-  export let config: Readable<PeriodicConfig>;
+  import { validateFormat, validateFormatComplexity } from "../validation";
 
-  const defaultFormat = DEFAULT_FORMAT[granularity];
+  let { granularity, config }: { granularity: Granularity; config: Readable<PeriodicConfig> } = $props();
+
+  const defaultFormat = $derived(DEFAULT_FORMAT[granularity]);
 
   let inputEl: HTMLInputElement;
-  let value: string = "";
-  let error: string;
-  let warning: string;
+  let error = $state("");
+  let warning = $state("");
+  let value = $derived($config.format || "");
 
-  $: {
-    value = $config.format || "";
-  }
-
-  onMount(() => {
+  $effect(() => {
     error = validateFormat(inputEl.value, granularity);
     warning = validateFormatComplexity(inputEl.value, granularity);
   });
@@ -76,8 +71,8 @@
       type="text"
       spellcheck={false}
       placeholder={defaultFormat}
-      on:change={onChange}
-      on:input={clearError}
+      onchange={onChange}
+      oninput={clearError}
     />
   </div>
 </div>

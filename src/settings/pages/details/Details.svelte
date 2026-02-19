@@ -11,20 +11,23 @@
   } from "src/settings/utils";
 
   import { granularities } from "src/types";
-  import { onMount } from "svelte";
   import type { Writable } from "svelte/store";
   import PeriodicGroup from "./PeriodicGroup.svelte";
 
-  export let app: App;
-  export let settings: Writable<ISettings>;
-  export let manager: CalendarSetManager;
-  export let selectedCalendarSet: string;
+  let { app, settings, manager, selectedCalendarSet }: {
+    app: App;
+    settings: Writable<ISettings>;
+    manager: CalendarSetManager;
+    selectedCalendarSet: string;
+  } = $props();
 
   let nameEl: HTMLDivElement;
   let optionsEl: HTMLDivElement;
-  let calendarsetName = selectedCalendarSet;
-  let isActive = selectedCalendarSet === manager.getActiveId();
-  let errorMsg = "";
+  // svelte-ignore state_referenced_locally
+  let calendarsetName = $state(selectedCalendarSet);
+  // svelte-ignore state_referenced_locally
+  let isActive = $state(selectedCalendarSet === manager.getActiveId());
+  let errorMsg = $state("");
 
   function tryToRename(e: FocusEvent) {
     const proposedName = (e.target as HTMLDivElement).innerHTML.trim();
@@ -105,7 +108,7 @@
     selection?.addRange(range);
   }
 
-  onMount(() => {
+  $effect(() => {
     setIcon(optionsEl, "more-vertical");
     document.getElementsByClassName("vertical-tab-content")[0].scroll(0, 0);
 
@@ -123,8 +126,8 @@
     tabindex="0"
     bind:innerHTML={calendarsetName}
     bind:this={nameEl}
-    on:blur={tryToRename}
-    on:keypress={submitOnEnter}
+    onblur={tryToRename}
+    onkeypress={submitOnEnter}
   ></div>
   <div class="calendarset-toolbar">
     {#if isActive}
@@ -135,8 +138,8 @@
       bind:this={optionsEl}
       role="button"
       tabindex="0"
-      on:click={toggleOptionsMenu}
-      on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') toggleOptionsMenu(e); }}
+      onclick={toggleOptionsMenu}
+      onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') toggleOptionsMenu(e); }}
     ></div>
   </div>
 </div>

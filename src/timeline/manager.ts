@@ -1,18 +1,23 @@
 import { MarkdownView } from "obsidian";
 import type { PeriodicNotesCache } from "src/cache";
 import type PeriodicNotesPlugin from "src/main";
-import type { SvelteComponent } from "svelte";
+import { mount, unmount } from "svelte";
 
 import Timeline from "./Timeline.svelte";
 
+interface MountedTimeline {
+  component: Record<string, never>;
+  target: HTMLElement;
+}
+
 export default class TimelineManager {
-  private btnComponents: SvelteComponent[];
+  private timelines: MountedTimeline[];
 
   constructor(
     readonly plugin: PeriodicNotesPlugin,
     readonly cache: PeriodicNotesCache,
   ) {
-    this.btnComponents = [];
+    this.timelines = [];
 
     this.plugin.app.workspace.onLayoutReady(() => {
       plugin.registerEvent(
@@ -23,8 +28,8 @@ export default class TimelineManager {
   }
 
   public cleanup() {
-    for (const existingEl of this.btnComponents) {
-      existingEl.$destroy();
+    for (const entry of this.timelines) {
+      unmount(entry.component);
     }
   }
 
@@ -36,33 +41,29 @@ export default class TimelineManager {
       }
     });
 
-    // Clean up timelines on closed leaves
-    for (const existingEl of this.btnComponents) {
-      if (
-        !openViews
-          .map((view) => view.containerEl)
-          .includes(existingEl.$$.root as HTMLElement)
-      ) {
-        existingEl.$destroy();
+    const openContainers = openViews.map((view) => view.containerEl);
+    this.timelines = this.timelines.filter((entry) => {
+      if (!openContainers.includes(entry.target)) {
+        unmount(entry.component);
+        return false;
       }
-    }
+      return true;
+    });
 
-    // Add to any view that doesn't already have one
     for (const view of openViews) {
-      const btn = this.btnComponents.find(
-        (btn) => btn.$$.root === view.containerEl,
+      const existing = this.timelines.find(
+        (entry) => entry.target === view.containerEl,
       );
-      if (!btn) {
-        this.btnComponents.push(
-          new Timeline({
-            target: view.containerEl,
-            props: {
-              plugin: this.plugin,
-              cache: this.cache,
-              view,
-            },
-          }),
-        );
+      if (!existing) {
+        const component = mount(Timeline, {
+          target: view.containerEl,
+          props: {
+            plugin: this.plugin,
+            cache: this.cache,
+            view,
+          },
+        });
+        this.timelines.push({ component, target: view.containerEl });
       }
     }
   }

@@ -1,6 +1,5 @@
 <script lang="ts">
-  export let isEnabled: boolean;
-  export let onChange: (value: boolean) => void;
+  let { isEnabled, onChange }: { isEnabled: boolean; onChange: (value: boolean) => void } = $props();
 </script>
 
 <div
@@ -8,6 +7,6 @@
   class:is-enabled={isEnabled}
   role="button"
   tabindex="0"
-  on:click={() => onChange(!isEnabled)}
-  on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') onChange(!isEnabled); }}
+  onclick={() => onChange(!isEnabled)}
+  onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') onChange(!isEnabled); }}
 ></div>

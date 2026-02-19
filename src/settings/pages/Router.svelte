@@ -7,7 +7,6 @@
 
   import Dashboard from "./dashboard/Dashboard.svelte";
   import Details from "./details/Details.svelte";
-  import { onDestroy, onMount } from "svelte";
   import { writable, type Writable } from "svelte/store";
   import type { ISettings } from "..";
   import {
@@ -15,14 +14,15 @@
     type ILocalizationSettings,
   } from "../localization";
 
-  export let app: App;
-  export let manager: CalendarSetManager;
-  export let settings: Writable<ISettings>;
+  let { app, manager, settings }: { app: App; manager: CalendarSetManager; settings: Writable<ISettings> } = $props();
 
+  // svelte-ignore state_referenced_locally
   let localization = writable(getLocalizationSettings(app));
 
-  onDestroy(() => {
-    router.reset();
+  $effect(() => {
+    return () => {
+      router.reset();
+    };
   });
 </script>
 

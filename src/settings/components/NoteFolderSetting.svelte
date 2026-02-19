@@ -1,20 +1,17 @@
 <script lang="ts">
   import type { App } from "obsidian";
-  import { onMount } from "svelte";
+  import type { Readable } from "svelte/store";
 
   import { FolderSuggest } from "src/ui/file-suggest";
   import type { Granularity, PeriodicConfig } from "src/types";
-
-  import { validateFolder } from "../validation";
-  import type { Readable } from "svelte/store";
   import { displayConfigs } from "src/commands";
 
-  export let config: Readable<PeriodicConfig>;
-  export let app: App;
-  export let granularity: Granularity;
+  import { validateFolder } from "../validation";
+
+  let { config, app, granularity }: { config: Readable<PeriodicConfig>; app: App; granularity: Granularity } = $props();
 
   let inputEl: HTMLInputElement;
-  let error: string;
+  let error = $state("");
 
   function onChange() {
     error = validateFolder(app, inputEl.value);
@@ -24,7 +21,7 @@
     error = "";
   }
 
-  onMount(() => {
+  $effect(() => {
     error = validateFolder(app, inputEl.value);
     new FolderSuggest(app, inputEl);
   });
@@ -48,8 +45,8 @@
       type="text"
       spellcheck={false}
       placeholder="e.g. folder 1/folder 2"
-      on:change={onChange}
-      on:input={clearError}
+      onchange={onChange}
+      oninput={clearError}
     />
   </div>
 </div>
