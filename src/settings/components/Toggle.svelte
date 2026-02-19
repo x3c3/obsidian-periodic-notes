@@ -6,5 +6,8 @@
 <div
   class="checkbox-container"
   class:is-enabled={isEnabled}
+  role="button"
+  tabindex="0"
   on:click={() => onChange(!isEnabled)}
-/>
+  on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') onChange(!isEnabled); }}
+></div>

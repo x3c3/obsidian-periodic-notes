@@ -100,7 +100,7 @@
 
 {#if showComplication && periodicData}
   <div class="timeline-container">
-    <div class="leaf-periodic-button" on:click={toggleCalendarVisibility}>
+    <div class="leaf-periodic-button" role="button" tabindex="0" on:click={toggleCalendarVisibility} on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') toggleCalendarVisibility(); }}>
       {#if periodicData.matchData.exact === false}
         <RelativeIcon />
       {/if}
@@ -119,7 +119,10 @@
             </div>
             <div
               class="timeline-day"
+              role="button"
+              tabindex="0"
               on:click={() => openPeriodicNoteInView("day", weekDay)}
+              on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') openPeriodicNoteInView("day", weekDay); }}
             >
               {weekDay.format("DD")}
             </div>

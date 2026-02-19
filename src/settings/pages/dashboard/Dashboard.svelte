@@ -60,12 +60,11 @@
 
 <div class="section-nav">
   <h3 class="section-title">Calendar Sets</h3>
-  <div class="clickable-icon" bind:this={addEl} on:click={addCalendarset} />
+  <div class="clickable-icon" bind:this={addEl} role="button" tabindex="0" on:click={addCalendarset} on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') addCalendarset(); }}></div>
 </div>
 <div class="calendarset-container">
   {#each $settings.calendarSets as calendarSet}
     <CalendarSetMenuItem
-      {app}
       {calendarSet}
       {manager}
       {settings}

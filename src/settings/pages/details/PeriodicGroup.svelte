@@ -52,7 +52,10 @@
 <div class="periodic-group">
   <div
     class="setting-item setting-item-heading periodic-group-heading"
+    role="button"
+    tabindex="0"
     on:click={toggleExpand}
+    on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') toggleExpand(); }}
   >
     <div class="setting-item-info">
       <h3 class="setting-item-name periodic-group-title">
@@ -67,7 +70,6 @@
       <label
         class="checkbox-container"
         class:is-enabled={$config.enabled}
-        on:click|stopPropagation
       >
         <input
           type="checkbox"

@@ -45,7 +45,7 @@
     }
   }
 
-  function toggleOptionsMenu(evt: MouseEvent) {
+  function toggleOptionsMenu(evt: MouseEvent | KeyboardEvent) {
     const menu = new Menu();
 
     if (!isActive) {
@@ -86,8 +86,13 @@
             deleteCalendarSet(selectedCalendarSet)($settings);
             router.navigate(["Periodic Notes"]);
           })
-      )
-      .showAtMouseEvent(evt);
+      );
+    if (evt instanceof MouseEvent) {
+      menu.showAtMouseEvent(evt);
+    } else {
+      const rect = optionsEl.getBoundingClientRect();
+      menu.showAtPosition({ x: rect.left, y: rect.bottom });
+    }
   }
 
   function focusEditableEl(el: HTMLDivElement) {
@@ -114,11 +119,13 @@
   <div
     class="calendarset-title"
     contenteditable="true"
+    role="textbox"
+    tabindex="0"
     bind:innerHTML={calendarsetName}
     bind:this={nameEl}
     on:blur={tryToRename}
     on:keypress={submitOnEnter}
-  />
+  ></div>
   <div class="calendarset-toolbar">
     {#if isActive}
       <div class="active-calendarset-badge">Active</div>
@@ -126,8 +133,11 @@
     <div
       class="view-action"
       bind:this={optionsEl}
+      role="button"
+      tabindex="0"
       on:click={toggleOptionsMenu}
-    />
+      on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') toggleOptionsMenu(e); }}
+    ></div>
   </div>
 </div>
 {#if errorMsg}

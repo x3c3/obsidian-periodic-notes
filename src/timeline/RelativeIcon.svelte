@@ -9,4 +9,4 @@
   });
 </script>
 
-<span bind:this={iconEl} />
+<span bind:this={iconEl}></span>

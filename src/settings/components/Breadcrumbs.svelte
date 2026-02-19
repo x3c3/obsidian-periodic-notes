@@ -11,7 +11,10 @@
 
     <div
       class="crumb"
+      role="button"
+      tabindex="0"
       on:click={() => router.navigate(crumbsSoFar)}
+      on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') router.navigate(crumbsSoFar); }}
       in:fly={{ x: -6, duration: 250 }}
       out:fly={{ x: -6, duration: 250 }}
     >

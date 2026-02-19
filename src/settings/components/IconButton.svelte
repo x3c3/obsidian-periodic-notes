@@ -11,4 +11,4 @@
   });
 </script>
 
-<div class="clickable-icon" bind:this={iconEl} />
+<div class="clickable-icon" bind:this={iconEl}></div>

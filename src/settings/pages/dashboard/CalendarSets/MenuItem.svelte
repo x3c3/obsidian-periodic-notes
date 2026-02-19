@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { App, Menu, setIcon } from "obsidian";
+  import { Menu, setIcon } from "obsidian";
   import { onMount } from "svelte";
   import type { Writable } from "svelte/store";
   import capitalize from "lodash/capitalize";
@@ -17,7 +17,6 @@
     setActiveSet,
   } from "src/settings/utils";
 
-  export let app: App;
   export let viewDetails: () => void;
   export let calendarSet: CalendarSet;
   export let manager: CalendarSetManager;
@@ -35,7 +34,7 @@
     settings.update(setActiveSet(calendarSet.id));
   }
 
-  function toggleOptionsMenu(evt: MouseEvent) {
+  function toggleOptionsMenu(evt: MouseEvent | KeyboardEvent) {
     const menu = new Menu();
 
     if ($settings.activeCalendarSet !== calendarSet.id) {
@@ -67,8 +66,13 @@
           .setIcon("x")
           .setDisabled(manager.getCalendarSets().length === 1)
           .onClick(deleteItem)
-      )
-      .showAtMouseEvent(evt);
+      );
+    if (evt instanceof MouseEvent) {
+      menu.showAtMouseEvent(evt);
+    } else {
+      const rect = optionsEl.getBoundingClientRect();
+      menu.showAtPosition({ x: rect.left, y: rect.bottom });
+    }
   }
 
   onMount(() => {
@@ -79,15 +83,21 @@
 <div
   class="calendarset-container"
   class:active={calendarSet.id === $settings.activeCalendarSet}
+  role="button"
+  tabindex="0"
   on:click={viewDetails}
+  on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') viewDetails(); }}
 >
   <div class="calendarset-titlebar">
     <h4 class="calendarset-name">{calendarSet.id}</h4>
     <div
       class="view-action"
       bind:this={optionsEl}
+      role="button"
+      tabindex="0"
       on:click|stopPropagation={toggleOptionsMenu}
-    />
+      on:keydown|stopPropagation={(e) => { if (e.key === 'Enter' || e.key === ' ') toggleOptionsMenu(e); }}
+    ></div>
   </div>
   <div class="included-types">
     {#each granularities as granularity}

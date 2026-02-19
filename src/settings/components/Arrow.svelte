@@ -11,7 +11,7 @@
   });
 </script>
 
-<div class="arrow" class:expanded={isExpanded} bind:this={arrowEl} />
+<div class="arrow" class:expanded={isExpanded} bind:this={arrowEl}></div>
 
 <style>
   .arrow {
