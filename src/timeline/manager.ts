@@ -1,6 +1,6 @@
 import { MarkdownView } from "obsidian";
-import { PeriodicNotesCache } from "src/cache";
-import PeriodicNotesPlugin from "src/main";
+import type { PeriodicNotesCache } from "src/cache";
+import type PeriodicNotesPlugin from "src/main";
 import type { SvelteComponent } from "svelte";
 
 import Timeline from "./Timeline.svelte";
@@ -8,12 +8,15 @@ import Timeline from "./Timeline.svelte";
 export default class TimelineManager {
   private btnComponents: SvelteComponent[];
 
-  constructor(readonly plugin: PeriodicNotesPlugin, readonly cache: PeriodicNotesCache) {
+  constructor(
+    readonly plugin: PeriodicNotesPlugin,
+    readonly cache: PeriodicNotesCache,
+  ) {
     this.btnComponents = [];
 
     this.plugin.app.workspace.onLayoutReady(() => {
       plugin.registerEvent(
-        plugin.app.workspace.on("layout-change", this.onLayoutChange, this)
+        plugin.app.workspace.on("layout-change", this.onLayoutChange, this),
       );
       this.onLayoutChange();
     });
@@ -46,7 +49,9 @@ export default class TimelineManager {
 
     // Add to any view that doesn't already have one
     for (const view of openViews) {
-      const btn = this.btnComponents.find((btn) => btn.$$.root === view.containerEl);
+      const btn = this.btnComponents.find(
+        (btn) => btn.$$.root === view.containerEl,
+      );
       if (!btn) {
         this.btnComponents.push(
           new Timeline({
@@ -56,7 +61,7 @@ export default class TimelineManager {
               cache: this.cache,
               view,
             },
-          })
+          }),
         );
       }
     }

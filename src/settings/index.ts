@@ -1,4 +1,4 @@
-import { App, PluginSettingTab } from "obsidian";
+import { type App, PluginSettingTab } from "obsidian";
 import { DEFAULT_CALENDARSET_ID } from "src/calendarSetManager";
 import type { CalendarSet, PeriodicConfig } from "src/types";
 import type { SvelteComponent } from "svelte";
@@ -58,7 +58,10 @@ export const DEFAULT_PERIODIC_CONFIG: PeriodicConfig = Object.freeze({
 export class PeriodicNotesSettingsTab extends PluginSettingTab {
   private view: SvelteComponent;
 
-  constructor(readonly app: App, readonly plugin: WeeklyNotesPlugin) {
+  constructor(
+    readonly app: App,
+    readonly plugin: WeeklyNotesPlugin,
+  ) {
     super(app, plugin);
     this.plugin = plugin;
   }

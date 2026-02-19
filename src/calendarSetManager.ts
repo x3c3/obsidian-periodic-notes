@@ -3,9 +3,9 @@ import type PeriodicNotesPlugin from "src/main";
 import { get } from "svelte/store";
 
 import {
-  granularities,
   type CalendarSet,
   type Granularity,
+  granularities,
   type PeriodicConfig,
 } from "./types";
 import { getConfig, getFormat } from "./utils";
@@ -31,7 +31,9 @@ interface ILegacySettings {
 
 export const DEFAULT_CALENDARSET_ID = "Default";
 
-export function isLegacySettings(settings: unknown): settings is ILegacySettings {
+export function isLegacySettings(
+  settings: unknown,
+): settings is ILegacySettings {
   const maybeLegacySettings = settings as ILegacySettings;
   return !!(
     maybeLegacySettings.daily ||
@@ -42,7 +44,9 @@ export function isLegacySettings(settings: unknown): settings is ILegacySettings
   );
 }
 
-export function migrateDailyNoteSettings(settings: ILegacySettings): CalendarSet {
+export function migrateDailyNoteSettings(
+  settings: ILegacySettings,
+): CalendarSet {
   const migrateConfig = (settings: DailyNotesSettings) => {
     return {
       enabled: true,
@@ -61,7 +65,7 @@ export function migrateDailyNoteSettings(settings: ILegacySettings): CalendarSet
 }
 
 export function migrateLegacySettingsToCalendarSet(
-  settings: ILegacySettings
+  settings: ILegacySettings,
 ): CalendarSet {
   const migrateConfig = (settings: ILegacySettings["daily"]) => {
     return {
@@ -94,7 +98,7 @@ export default class CalendarSetManager {
   public getActiveSet(): CalendarSet {
     const settings = get(this.plugin.settings);
     const activeSet = settings.calendarSets.find(
-      (set) => set.id === settings.activeCalendarSet
+      (set) => set.id === settings.activeCalendarSet,
     );
     if (!activeSet) {
       throw new Error("No active calendar set found");
@@ -118,12 +122,16 @@ export default class CalendarSetManager {
 
   public getInactiveGranularities(): Granularity[] {
     const activeSet = this.getActiveSet();
-    return granularities.filter((granularity) => !activeSet[granularity]?.enabled);
+    return granularities.filter(
+      (granularity) => !activeSet[granularity]?.enabled,
+    );
   }
 
   public getActiveGranularities(): Granularity[] {
     const activeSet = this.getActiveSet();
-    return granularities.filter((granularity) => activeSet[granularity]?.enabled);
+    return granularities.filter(
+      (granularity) => activeSet[granularity]?.enabled,
+    );
   }
 
   public renameCalendarset(calendarSetId: string, proposedName: string): void {
@@ -137,14 +145,18 @@ export default class CalendarSetManager {
 
     this.plugin.settings.update((settings) => {
       const existingSetWithName = settings.calendarSets.find(
-        (c) => c.id === proposedName
+        (c) => c.id === proposedName,
       );
 
       if (existingSetWithName) {
-        throw new Error(`A calendar set with the name '${proposedName}' already exists`);
+        throw new Error(
+          `A calendar set with the name '${proposedName}' already exists`,
+        );
       }
 
-      const calendarSet = settings.calendarSets.find((c) => c.id === calendarSetId);
+      const calendarSet = settings.calendarSets.find(
+        (c) => c.id === calendarSetId,
+      );
       if (calendarSet) {
         calendarSet.id = proposedName;
         if (settings.activeCalendarSet === calendarSetId) {

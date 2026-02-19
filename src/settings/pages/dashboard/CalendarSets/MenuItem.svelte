@@ -1,4 +1,4 @@
-<script type="ts">
+<script lang="ts">
   import { App, Menu, setIcon } from "obsidian";
   import { onMount } from "svelte";
   import type { Writable } from "svelte/store";
@@ -36,7 +36,7 @@
   }
 
   function toggleOptionsMenu(evt: MouseEvent) {
-    const menu = new Menu(app);
+    const menu = new Menu();
 
     if ($settings.activeCalendarSet !== calendarSet.id) {
       menu
@@ -72,7 +72,7 @@
   }
 
   onMount(() => {
-    setIcon(optionsEl, "more-vertical", 18);
+    setIcon(optionsEl, "more-vertical");
   });
 </script>
 
@@ -109,7 +109,7 @@
   </div>
 </div>
 
-<style type="scss">
+<style lang="scss">
   .calendarset-container {
     background: var(--background-primary-alt);
     border-radius: 16px;

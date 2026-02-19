@@ -3,12 +3,11 @@
   import { onMount } from "svelte";
 
   export let iconType: string;
-  export let size: number;
 
   let iconEl: HTMLElement;
 
   onMount(() => {
-    setIcon(iconEl, iconType, size);
+    setIcon(iconEl, iconType);
   });
 </script>
 

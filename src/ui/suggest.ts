@@ -1,5 +1,5 @@
 import { createPopper, type Instance as PopperInstance } from "@popperjs/core";
-import { App, type ISuggestOwner, Scope } from "obsidian";
+import { type App, type ISuggestOwner, Scope } from "obsidian";
 import { wrapAround } from "src/settings/utils";
 
 class Suggest<T> {
@@ -13,11 +13,15 @@ class Suggest<T> {
     this.owner = owner;
     this.containerEl = containerEl;
 
-    containerEl.on("click", ".suggestion-item", this.onSuggestionClick.bind(this));
+    containerEl.on(
+      "click",
+      ".suggestion-item",
+      this.onSuggestionClick.bind(this),
+    );
     containerEl.on(
       "mousemove",
       ".suggestion-item",
-      this.onSuggestionMouseover.bind(this)
+      this.onSuggestionMouseover.bind(this),
     );
 
     scope.register([], "ArrowUp", (event) => {
@@ -116,9 +120,13 @@ export abstract class TextInputSuggest<T> implements ISuggestOwner<T> {
     this.inputEl.addEventListener("input", this.onInputChanged.bind(this));
     this.inputEl.addEventListener("focus", this.onInputChanged.bind(this));
     this.inputEl.addEventListener("blur", this.close.bind(this));
-    this.suggestEl.on("mousedown", ".suggestion-container", (event: MouseEvent) => {
-      event.preventDefault();
-    });
+    this.suggestEl.on(
+      "mousedown",
+      ".suggestion-container",
+      (event: MouseEvent) => {
+        event.preventDefault();
+      },
+    );
   }
 
   onInputChanged(): void {
@@ -127,13 +135,15 @@ export abstract class TextInputSuggest<T> implements ISuggestOwner<T> {
 
     if (suggestions.length > 0) {
       this.suggest.setSuggestions(suggestions);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // private API: app.dom.appContainerEl is undocumented
+      // biome-ignore lint/suspicious/noExplicitAny: Obsidian API lacks type
       this.open((<any>this.app).dom.appContainerEl, this.inputEl);
     }
   }
 
   open(container: HTMLElement, inputEl: HTMLElement): void {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // private API: app.keymap is undocumented
+    // biome-ignore lint/suspicious/noExplicitAny: Obsidian API lacks type
     (<any>this.app).keymap.pushScope(this.scope);
 
     container.appendChild(this.suggestEl);
@@ -163,7 +173,8 @@ export abstract class TextInputSuggest<T> implements ISuggestOwner<T> {
   }
 
   close(): void {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // private API: app.keymap is undocumented
+    // biome-ignore lint/suspicious/noExplicitAny: Obsidian API lacks type
     (<any>this.app).keymap.popScope(this.scope);
 
     this.suggest.setSuggestions([]);

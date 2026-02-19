@@ -1,4 +1,4 @@
-import { type Command, App, TFile, Notice } from "obsidian";
+import { type App, type Command, Notice, TFile } from "obsidian";
 import type PeriodicNotesPlugin from "src/main";
 
 import type { Granularity } from "./types";
@@ -40,7 +40,7 @@ export const displayConfigs: Record<Granularity, IDisplayConfig> = {
 async function jumpToAdjacentNote(
   app: App,
   plugin: PeriodicNotesPlugin,
-  direction: "forwards" | "backwards"
+  direction: "forwards" | "backwards",
 ): Promise<void> {
   const activeFile = app.workspace.getActiveFile();
   if (!activeFile) return;
@@ -50,13 +50,13 @@ async function jumpToAdjacentNote(
   const adjacentNoteMeta = plugin.findAdjacent(
     activeFileMeta.calendarSet,
     activeFile.path,
-    direction
+    direction,
   );
 
   if (adjacentNoteMeta) {
     const file = app.vault.getAbstractFileByPath(adjacentNoteMeta.filePath);
     if (file && file instanceof TFile) {
-      const leaf = app.workspace.getUnpinnedLeaf();
+      const leaf = app.workspace.getLeaf();
       await leaf.openFile(file, { active: true });
     }
   } else {
@@ -64,7 +64,7 @@ async function jumpToAdjacentNote(
     new Notice(
       `There's no ${
         displayConfigs[activeFileMeta.granularity].periodicity
-      } note ${qualifier} this`
+      } note ${qualifier} this`,
     );
   }
 }
@@ -72,7 +72,7 @@ async function jumpToAdjacentNote(
 async function openAdjacentNote(
   app: App,
   plugin: PeriodicNotesPlugin,
-  direction: "forwards" | "backwards"
+  direction: "forwards" | "backwards",
 ): Promise<void> {
   const activeFile = app.workspace.getActiveFile();
   if (!activeFile) return;
@@ -90,7 +90,7 @@ async function openAdjacentNote(
 export function getCommands(
   app: App,
   plugin: PeriodicNotesPlugin,
-  granularity: Granularity
+  granularity: Granularity,
 ): Command[] {
   const config = displayConfigs[granularity];
 

@@ -1,4 +1,10 @@
-import { App, type NLDatesPlugin, Scope, SuggestModal, TFile } from "obsidian";
+import {
+  type App,
+  type NLDatesPlugin,
+  type Scope,
+  SuggestModal,
+  type TFile,
+} from "obsidian";
 
 interface FileCommandItem {
   label: string;
@@ -28,7 +34,9 @@ export class FileOptionsSwitcher extends SuggestModal<FileOptionsItem> {
     this.setInstructions(DEFAULT_INSTRUCTIONS);
     this.setPlaceholder("Type date to find daily note");
 
-    this.nlDatesPlugin = app.plugins.getPlugin("nldates-obsidian") as NLDatesPlugin;
+    this.nlDatesPlugin = app.plugins.getPlugin(
+      "nldates-obsidian",
+    ) as NLDatesPlugin;
   }
 
   getSuggestions(query: string): FileCommandItem[] {
@@ -43,7 +51,10 @@ export class FileOptionsSwitcher extends SuggestModal<FileOptionsItem> {
     el.setText(value.label);
   }
 
-  async onChooseSuggestion(_item: FileCommandItem, _evt: MouseEvent | KeyboardEvent) {
+  async onChooseSuggestion(
+    _item: FileCommandItem,
+    _evt: MouseEvent | KeyboardEvent,
+  ) {
     // run command
   }
 }

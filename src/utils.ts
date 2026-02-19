@@ -1,11 +1,17 @@
 import type { Moment } from "moment";
-import { normalizePath, App, Notice, Platform, TFile } from "obsidian";
+import {
+  type App,
+  Notice,
+  normalizePath,
+  Platform,
+  type TFile,
+} from "obsidian";
 
 import type { PeriodicNoteCachedMetadata } from "./cache";
 import { DEFAULT_FORMAT, HUMANIZE_FORMAT } from "./constants";
 import { DEFAULT_PERIODIC_CONFIG } from "./settings";
 import { removeEscapedCharacters } from "./settings/validation";
-import { type CalendarSet, type Granularity, type PeriodicConfig } from "./types";
+import type { CalendarSet, Granularity, PeriodicConfig } from "./types";
 
 export function isMetaPressed(e: MouseEvent | KeyboardEvent): boolean {
   return Platform.isMacOS ? e.metaKey : e.ctrlKey;
@@ -13,7 +19,7 @@ export function isMetaPressed(e: MouseEvent | KeyboardEvent): boolean {
 
 function getDaysOfWeek(): string[] {
   const { moment } = window;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // biome-ignore lint/suspicious/noExplicitAny: Obsidian API lacks type
   let weekStart = (moment.localeData() as any)._week.dow;
   const daysOfWeek = [
     "sunday",
@@ -42,7 +48,7 @@ export function applyTemplateTransformations(
   granularity: Granularity,
   date: Moment,
   format: string,
-  rawTemplateContents: string
+  rawTemplateContents: string,
 ): string {
   let templateContents = rawTemplateContents;
 
@@ -53,7 +59,10 @@ export function applyTemplateTransformations(
 
   if (granularity === "day") {
     templateContents = templateContents
-      .replace(/{{\s*yesterday\s*}}/gi, date.clone().subtract(1, "day").format(format))
+      .replace(
+        /{{\s*yesterday\s*}}/gi,
+        date.clone().subtract(1, "day").format(format),
+      )
       .replace(/{{\s*tomorrow\s*}}/gi, date.clone().add(1, "d").format(format))
       .replace(
         /{{\s*(date|time)\s*(([+-]\d+)([yqmwdhs]))?\s*(:.+?)?}}/gi,
@@ -72,7 +81,7 @@ export function applyTemplateTransformations(
             return currentDate.format(momentFormat.substring(1).trim());
           }
           return currentDate.format(format);
-        }
+        },
       );
   }
 
@@ -82,7 +91,7 @@ export function applyTemplateTransformations(
       (_, dayOfWeek, momentFormat) => {
         const day = getDayOfWeekNumericalValue(dayOfWeek);
         return date.weekday(day).format(momentFormat.trim());
-      }
+      },
     );
   }
 
@@ -107,7 +116,7 @@ export function applyTemplateTransformations(
           return monthStart.format(momentFormat.substring(1).trim());
         }
         return monthStart.format(format);
-      }
+      },
     );
   }
 
@@ -132,7 +141,7 @@ export function applyTemplateTransformations(
           return monthStart.format(momentFormat.substring(1).trim());
         }
         return monthStart.format(format);
-      }
+      },
     );
   }
 
@@ -157,14 +166,17 @@ export function applyTemplateTransformations(
           return monthStart.format(momentFormat.substring(1).trim());
         }
         return monthStart.format(format);
-      }
+      },
     );
   }
 
   return templateContents;
 }
 
-export function getFormat(calendarSet: CalendarSet, granularity: Granularity): string {
+export function getFormat(
+  calendarSet: CalendarSet,
+  granularity: Granularity,
+): string {
   return calendarSet[granularity]?.format || DEFAULT_FORMAT[granularity];
 }
 
@@ -175,7 +187,7 @@ export function getFormat(calendarSet: CalendarSet, granularity: Granularity): s
  */
 export function getPossibleFormats(
   calendarSet: CalendarSet,
-  granularity: Granularity
+  granularity: Granularity,
 ): string[] {
   const format = calendarSet[granularity]?.format;
   if (!format) return [DEFAULT_FORMAT[granularity]];
@@ -188,13 +200,16 @@ export function getPossibleFormats(
   return [format];
 }
 
-export function getFolder(calendarSet: CalendarSet, granularity: Granularity): string {
+export function getFolder(
+  calendarSet: CalendarSet,
+  granularity: Granularity,
+): string {
   return calendarSet[granularity]?.folder || "/";
 }
 
 export function getConfig(
   calendarSet: CalendarSet,
-  granularity: Granularity
+  granularity: Granularity,
 ): PeriodicConfig {
   return calendarSet[granularity] ?? DEFAULT_PERIODIC_CONFIG;
 }
@@ -203,26 +218,26 @@ export async function applyPeriodicTemplateToFile(
   app: App,
   file: TFile,
   calendarSet: CalendarSet,
-  metadata: PeriodicNoteCachedMetadata
+  metadata: PeriodicNoteCachedMetadata,
 ) {
   const format = getFormat(calendarSet, metadata.granularity);
   const templateContents = await getTemplateContents(
     app,
-    calendarSet[metadata.granularity]?.templatePath
+    calendarSet[metadata.granularity]?.templatePath,
   );
   const renderedContents = applyTemplateTransformations(
     file.basename,
     metadata.granularity,
     metadata.date,
     format,
-    templateContents
+    templateContents,
   );
   return app.vault.modify(file, renderedContents);
 }
 
 export async function getTemplateContents(
   app: App,
-  templatePath: string | undefined
+  templatePath: string | undefined,
 ): Promise<string> {
   const { metadataCache, vault } = app;
   const normalizedTemplatePath = normalizePath(templatePath ?? "");
@@ -231,12 +246,15 @@ export async function getTemplateContents(
   }
 
   try {
-    const templateFile = metadataCache.getFirstLinkpathDest(normalizedTemplatePath, "");
+    const templateFile = metadataCache.getFirstLinkpathDest(
+      normalizedTemplatePath,
+      "",
+    );
     return templateFile ? vault.cachedRead(templateFile) : "";
   } catch (err) {
     console.error(
       `Failed to read the daily note template '${normalizedTemplatePath}'`,
-      err
+      err,
     );
     new Notice("Failed to read the daily note template");
     return "";
@@ -246,10 +264,12 @@ export async function getTemplateContents(
 export async function getNoteCreationPath(
   app: App,
   filename: string,
-  periodicConfig: PeriodicConfig
+  periodicConfig: PeriodicConfig,
 ): Promise<string> {
   const directory = periodicConfig.folder ?? "";
-  const filenameWithExt = !filename.endsWith(".md") ? `${filename}.md` : filename;
+  const filenameWithExt = !filename.endsWith(".md")
+    ? `${filename}.md`
+    : filename;
 
   const path = normalizePath(join(directory, filenameWithExt));
   await ensureFolderExists(app, path);
@@ -281,7 +301,8 @@ export function join(...partSegments: string[]): string {
 
 export function basename(fullPath: string): string {
   let base = fullPath.substring(fullPath.lastIndexOf("/") + 1);
-  if (base.lastIndexOf(".") != -1) base = base.substring(0, base.lastIndexOf("."));
+  if (base.lastIndexOf(".") !== -1)
+    base = base.substring(0, base.lastIndexOf("."));
   return base;
 }
 
@@ -298,7 +319,7 @@ async function ensureFolderExists(app: App, path: string): Promise<void> {
 }
 
 export function getRelativeDate(granularity: Granularity, date: Moment) {
-  if (granularity == "week") {
+  if (granularity === "week") {
     const thisWeek = window.moment().startOf(granularity);
     const fromNow = window.moment(date).diff(thisWeek, "week");
     if (fromNow === 0) {
@@ -318,9 +339,7 @@ export function getRelativeDate(granularity: Granularity, date: Moment) {
       sameDay: "[Today]",
       nextDay: "[Tomorrow]",
       nextWeek: "dddd",
-      sameElse: function () {
-        return "[" + fromNow + "]";
-      },
+      sameElse: () => `[${fromNow}]`,
     });
   } else {
     return date.format(HUMANIZE_FORMAT[granularity]);

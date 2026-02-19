@@ -1,5 +1,5 @@
 import type { Moment } from "moment";
-import { type NLDatesPlugin, setIcon, App, SuggestModal } from "obsidian";
+import { type App, type NLDatesPlugin, SuggestModal, setIcon } from "obsidian";
 import type { MatchType } from "src/cache";
 import type PeriodicNotesPlugin from "src/main";
 import {
@@ -34,13 +34,18 @@ const DEFAULT_INSTRUCTIONS = [
 export class NLDNavigator extends SuggestModal<DateNavigationItem> {
   private nlDatesPlugin: NLDatesPlugin;
 
-  constructor(readonly app: App, readonly plugin: PeriodicNotesPlugin) {
+  constructor(
+    readonly app: App,
+    readonly plugin: PeriodicNotesPlugin,
+  ) {
     super(app);
 
     this.setInstructions(DEFAULT_INSTRUCTIONS);
     this.setPlaceholder("Type date to find related notes");
 
-    this.nlDatesPlugin = app.plugins.getPlugin("nldates-obsidian") as NLDatesPlugin;
+    this.nlDatesPlugin = app.plugins.getPlugin(
+      "nldates-obsidian",
+    ) as NLDatesPlugin;
 
     this.scope.register(["Meta"], "Enter", (evt: KeyboardEvent) => {
       // @ts-expect-error this.chooser exists but is not exposed
@@ -54,13 +59,13 @@ export class NLDNavigator extends SuggestModal<DateNavigationItem> {
         this.app,
         this.plugin,
         this.getSelectedItem(),
-        this.inputEl.value
+        this.inputEl.value,
       ).open();
     });
   }
 
   private getSelectedItem(): DateNavigationItem {
-    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+    // biome-ignore lint/suspicious/noExplicitAny: Obsidian API lacks type
     return (this as any).chooser.values[(this as any).chooser.selectedItem];
   }
 
@@ -118,7 +123,8 @@ export class NLDNavigator extends SuggestModal<DateNavigationItem> {
   }
 
   getDateSuggestions(query: string): DateNavigationItem[] {
-    const activeGranularities = this.plugin.calendarSetManager.getActiveGranularities();
+    const activeGranularities =
+      this.plugin.calendarSetManager.getActiveGranularities();
     const getSuggestion = (dateStr: string, granularity: Granularity) => {
       const date = this.nlDatesPlugin.parseDate(dateStr);
       return {
@@ -148,7 +154,8 @@ export class NLDNavigator extends SuggestModal<DateNavigationItem> {
         .filter((items) => items.label.toLowerCase().startsWith(query));
     }
 
-    const relativeDate = query.match(/^in ([+-]?\d+)/i) || query.match(/^([+-]?\d+)/i);
+    const relativeDate =
+      query.match(/^in ([+-]?\d+)/i) || query.match(/^([+-]?\d+)/i);
     if (relativeDate) {
       const timeDelta = relativeDate[1];
       return [
@@ -196,7 +203,10 @@ export class NLDNavigator extends SuggestModal<DateNavigationItem> {
       .getPeriodicNotes(value.granularity, value.date)
       .filter((e) => e.matchData.exact === false).length;
 
-    const periodicNote = this.plugin.getPeriodicNote(value.granularity, value.date);
+    const periodicNote = this.plugin.getPeriodicNote(
+      value.granularity,
+      value.date,
+    );
 
     if (!periodicNote) {
       const calendarSet = this.plugin.calendarSetManager.getActiveSet();
@@ -204,10 +214,13 @@ export class NLDNavigator extends SuggestModal<DateNavigationItem> {
       const folder = getFolder(calendarSet, value.granularity);
       el.setText(value.label);
       el.createEl("span", { cls: "suggestion-flair", prepend: true }, (el) => {
-        setIcon(el, "add-note-glyph", 16);
+        setIcon(el, "file-plus");
       });
       if (numRelatedNotes > 0) {
-        el.createEl("span", { cls: "suggestion-badge", text: `+${numRelatedNotes}` });
+        el.createEl("span", {
+          cls: "suggestion-badge",
+          text: `+${numRelatedNotes}`,
+        });
       }
       el.createEl("div", {
         cls: "suggestion-note",
@@ -217,19 +230,29 @@ export class NLDNavigator extends SuggestModal<DateNavigationItem> {
     }
 
     const curPath = this.app.workspace.getActiveFile()?.path ?? "";
-    const filePath = this.app.metadataCache.fileToLinktext(periodicNote, curPath, true);
+    const filePath = this.app.metadataCache.fileToLinktext(
+      periodicNote,
+      curPath,
+      true,
+    );
 
     el.setText(value.label);
     el.createEl("div", { cls: "suggestion-note", text: filePath });
     el.createEl("span", { cls: "suggestion-flair", prepend: true }, (el) => {
-      setIcon(el, `calendar-${value.granularity}`, 16);
+      setIcon(el, `calendar-${value.granularity}`);
     });
     if (numRelatedNotes > 0) {
-      el.createEl("span", { cls: "suggestion-badge", text: `+${numRelatedNotes}` });
+      el.createEl("span", {
+        cls: "suggestion-badge",
+        text: `+${numRelatedNotes}`,
+      });
     }
   }
 
-  async onChooseSuggestion(item: DateNavigationItem, evt: MouseEvent | KeyboardEvent) {
+  async onChooseSuggestion(
+    item: DateNavigationItem,
+    evt: MouseEvent | KeyboardEvent,
+  ) {
     this.plugin.openPeriodicNote(item.granularity, item.date, {
       inNewSplit: isMetaPressed(evt),
     });

@@ -1,10 +1,13 @@
-import { App, type FuzzyMatch, FuzzySuggestModal } from "obsidian";
-import PeriodicNotesPlugin from "src/main";
+import { type App, type FuzzyMatch, FuzzySuggestModal } from "obsidian";
+import type PeriodicNotesPlugin from "src/main";
 import { setActiveSet } from "src/settings/utils";
 import type { CalendarSet } from "src/types";
 
 export class CalendarSetSuggestModal extends FuzzySuggestModal<CalendarSet> {
-  constructor(app: App, readonly plugin: PeriodicNotesPlugin) {
+  constructor(
+    app: App,
+    readonly plugin: PeriodicNotesPlugin,
+  ) {
     super(app);
   }
 
@@ -20,7 +23,10 @@ export class CalendarSetSuggestModal extends FuzzySuggestModal<CalendarSet> {
     el.createDiv({ text: calendarSet.item.id });
   }
 
-  async onChooseItem(item: CalendarSet, _evt: MouseEvent | KeyboardEvent): Promise<void> {
+  async onChooseItem(
+    item: CalendarSet,
+    _evt: MouseEvent | KeyboardEvent,
+  ): Promise<void> {
     this.plugin.settings.update(setActiveSet(item.id));
   }
 }

@@ -1,8 +1,8 @@
 import type { Moment } from "moment";
-import { addIcon, Plugin, TFile } from "obsidian";
-import { writable, type Writable } from "svelte/store";
+import { addIcon, Plugin, type TFile } from "obsidian";
+import { type Writable, writable } from "svelte/store";
 
-import { PeriodicNotesCache, type PeriodicNoteCachedMetadata } from "./cache";
+import { type PeriodicNoteCachedMetadata, PeriodicNotesCache } from "./cache";
 import CalendarSetManager, {
   DEFAULT_CALENDARSET_ID,
   isLegacySettings,
@@ -13,21 +13,18 @@ import { displayConfigs, getCommands } from "./commands";
 import {
   calendarDayIcon,
   calendarMonthIcon,
-  calendarWeekIcon,
   calendarQuarterIcon,
+  calendarWeekIcon,
   calendarYearIcon,
 } from "./icons";
 import { showFileMenu } from "./modal";
 import {
+  DEFAULT_PERIODIC_CONFIG,
+  DEFAULT_SETTINGS,
   type ISettings,
   PeriodicNotesSettingsTab,
-  DEFAULT_SETTINGS,
-  DEFAULT_PERIODIC_CONFIG,
 } from "./settings";
-import {
-  configureGlobalMomentLocale,
-  initializeLocaleConfigOnce,
-} from "./settings/localization";
+import { initializeLocaleConfigOnce } from "./settings/localization";
 import {
   createNewCalendarSet,
   findStartupNoteConfig,
@@ -83,7 +80,7 @@ export default class PeriodicNotesPlugin extends Plugin {
 
     this.openPeriodicNote = this.openPeriodicNote.bind(this);
     this.addSettingTab(new PeriodicNotesSettingsTab(this.app, this));
-    
+
     this.configureRibbonIcons();
     this.configureCommands();
 
@@ -95,7 +92,7 @@ export default class PeriodicNotesPlugin extends Plugin {
           return false;
         }
         if (checking) {
-          return !!this.app.workspace.activeLeaf;
+          return !!this.app.workspace.getMostRecentLeaf();
         }
         new NLDNavigator(this.app, this).open();
       },
@@ -124,7 +121,8 @@ export default class PeriodicNotesPlugin extends Plugin {
   private configureRibbonIcons() {
     this.ribbonEl?.detach();
 
-    const configuredGranularities = this.calendarSetManager.getActiveGranularities();
+    const configuredGranularities =
+      this.calendarSetManager.getActiveGranularities();
     if (configuredGranularities.length) {
       const granularity = configuredGranularities[0];
       const config = displayConfigs[granularity];
@@ -137,7 +135,7 @@ export default class PeriodicNotesPlugin extends Plugin {
               inNewSplit: isMetaPressed(e),
             });
           }
-        }
+        },
       );
       this.ribbonEl.addEventListener("contextmenu", (e: MouseEvent) => {
         e.preventDefault();
@@ -154,16 +152,19 @@ export default class PeriodicNotesPlugin extends Plugin {
     this.calendarSetManager
       .getInactiveGranularities()
       .forEach((granularity: Granularity) => {
-        getCommands(this.app, this, granularity).forEach((command) =>
-          this.app.commands.removeCommand(`periodic-notes:${command.id}`)
-        );
+        getCommands(this.app, this, granularity).forEach((command) => {
+          // private API: CommandManager.removeCommand is undocumented
+          this.app.commands.removeCommand(`periodic-notes:${command.id}`);
+        });
       });
 
     // register enabled commands
     this.calendarSetManager
       .getActiveGranularities()
       .forEach((granularity: Granularity) => {
-        getCommands(this.app, this, granularity).forEach(this.addCommand.bind(this));
+        getCommands(this.app, this, granularity).forEach(
+          this.addCommand.bind(this),
+        );
       });
   }
 
@@ -178,12 +179,15 @@ export default class PeriodicNotesPlugin extends Plugin {
         this.settings.update(
           createNewCalendarSet(
             DEFAULT_CALENDARSET_ID,
-            migrateLegacySettingsToCalendarSet(settings)
-          )
+            migrateLegacySettingsToCalendarSet(settings),
+          ),
         );
       } else if (hasLegacyDailyNoteSettings(app)) {
         this.settings.update(
-          createNewCalendarSet(DEFAULT_CALENDARSET_ID, migrateDailyNoteSettings(settings))
+          createNewCalendarSet(
+            DEFAULT_CALENDARSET_ID,
+            migrateDailyNoteSettings(settings),
+          ),
         );
       } else {
         // otherwise create new default calendar set
@@ -193,7 +197,7 @@ export default class PeriodicNotesPlugin extends Plugin {
               ...DEFAULT_PERIODIC_CONFIG,
               enabled: true,
             },
-          })
+          }),
         );
       }
       this.settings.update(setActiveSet(DEFAULT_CALENDARSET_ID));
@@ -211,18 +215,21 @@ export default class PeriodicNotesPlugin extends Plugin {
 
   public async createPeriodicNote(
     granularity: Granularity,
-    date: Moment
+    date: Moment,
   ): Promise<TFile> {
     const config = this.calendarSetManager.getActiveConfig(granularity);
     const format = this.calendarSetManager.getFormat(granularity);
     const filename = date.format(format);
-    const templateContents = await getTemplateContents(this.app, config.templatePath);
+    const templateContents = await getTemplateContents(
+      this.app,
+      config.templatePath,
+    );
     const renderedContents = applyTemplateTransformations(
       filename,
       granularity,
       date,
       format,
-      templateContents
+      templateContents,
     );
     const destPath = await getNoteCreationPath(this.app, filename, config);
     return this.app.vault.create(destPath, renderedContents);
@@ -232,7 +239,7 @@ export default class PeriodicNotesPlugin extends Plugin {
     return this.cache.getPeriodicNote(
       this.calendarSetManager.getActiveId(),
       granularity,
-      date
+      date,
     );
   }
 
@@ -240,13 +247,13 @@ export default class PeriodicNotesPlugin extends Plugin {
   public getPeriodicNotes(
     granularity: Granularity,
     date: Moment,
-    includeFinerGranularities = false
+    includeFinerGranularities = false,
   ): PeriodicNoteCachedMetadata[] {
     return this.cache.getPeriodicNotes(
       this.calendarSetManager.getActiveId(),
       granularity,
       date,
-      includeFinerGranularities
+      includeFinerGranularities,
     );
   }
 
@@ -257,7 +264,7 @@ export default class PeriodicNotesPlugin extends Plugin {
   public findAdjacent(
     calendarSet: string,
     filePath: string,
-    direction: "forwards" | "backwards"
+    direction: "forwards" | "backwards",
   ): PeriodicNoteCachedMetadata | null {
     return this.cache.findAdjacent(calendarSet, filePath, direction);
   }
@@ -269,20 +276,20 @@ export default class PeriodicNotesPlugin extends Plugin {
   public async openPeriodicNote(
     granularity: Granularity,
     date: Moment,
-    opts?: IOpenOpts
+    opts?: IOpenOpts,
   ): Promise<void> {
     const { inNewSplit = false, calendarSet } = opts ?? {};
     const { workspace } = this.app;
     let file = this.cache.getPeriodicNote(
       calendarSet ?? this.calendarSetManager.getActiveId(),
       granularity,
-      date
+      date,
     );
     if (!file) {
       file = await this.createPeriodicNote(granularity, date);
     }
 
-    const leaf = inNewSplit ? workspace.splitActiveLeaf() : workspace.getUnpinnedLeaf();
+    const leaf = inNewSplit ? workspace.getLeaf("split") : workspace.getLeaf();
     await leaf.openFile(file, { active: true });
   }
 }

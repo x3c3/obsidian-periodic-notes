@@ -1,8 +1,8 @@
-import { setIcon, App, SuggestModal, TFile } from "obsidian";
+import { type App, SuggestModal, setIcon, TFile } from "obsidian";
 import { DEFAULT_FORMAT } from "src/constants";
 import type PeriodicNotesPlugin from "src/main";
 
-import { NLDNavigator, type DateNavigationItem } from "./switcher";
+import { type DateNavigationItem, NLDNavigator } from "./switcher";
 
 const DEFAULT_INSTRUCTIONS = [
   { command: "*", purpose: "show all notes within this period" },
@@ -19,7 +19,7 @@ export class RelatedFilesSwitcher extends SuggestModal<DateNavigationItem> {
     readonly app: App,
     readonly plugin: PeriodicNotesPlugin,
     readonly selectedItem: DateNavigationItem,
-    readonly oldQuery: string
+    readonly oldQuery: string,
   ) {
     super(app);
 
@@ -35,7 +35,7 @@ export class RelatedFilesSwitcher extends SuggestModal<DateNavigationItem> {
           text: "Expanded",
         });
         this.inputLabel.toggleVisibility(false);
-      })
+      }),
     );
 
     this.scope.register([], "Tab", (evt: KeyboardEvent) => {
@@ -60,12 +60,18 @@ export class RelatedFilesSwitcher extends SuggestModal<DateNavigationItem> {
 
   private getDatePrefixedNotes(
     item: DateNavigationItem,
-    query: string
+    query: string,
   ): DateNavigationItem[] {
     return this.plugin
-      .getPeriodicNotes(item.granularity, item.date, this.includeFinerGranularities)
+      .getPeriodicNotes(
+        item.granularity,
+        item.date,
+        this.includeFinerGranularities,
+      )
       .filter((e) => e.matchData.exact === false)
-      .filter((e) => e.filePath.toLocaleLowerCase().includes(query.toLocaleLowerCase()))
+      .filter((e) =>
+        e.filePath.toLocaleLowerCase().includes(query.toLocaleLowerCase()),
+      )
       .map((e) => ({
         label: e.filePath,
         date: e.date,
@@ -85,17 +91,20 @@ export class RelatedFilesSwitcher extends SuggestModal<DateNavigationItem> {
       text: value.date.format(DEFAULT_FORMAT[value.granularity]),
     });
     el.createEl("span", { cls: "suggestion-flair", prepend: true }, (el) => {
-      setIcon(el, `calendar-${value.granularity}`, 16);
+      setIcon(el, `calendar-${value.granularity}`);
     });
   }
 
-  async onChooseSuggestion(item: DateNavigationItem, evt: MouseEvent | KeyboardEvent) {
+  async onChooseSuggestion(
+    item: DateNavigationItem,
+    evt: MouseEvent | KeyboardEvent,
+  ) {
     const file = this.app.vault.getAbstractFileByPath(item.label);
     if (file && file instanceof TFile) {
       const inNewSplit = evt.shiftKey;
       const leaf = inNewSplit
-        ? this.app.workspace.splitActiveLeaf()
-        : this.app.workspace.getUnpinnedLeaf();
+        ? this.app.workspace.getLeaf("split")
+        : this.app.workspace.getLeaf();
       await leaf.openFile(file, { active: true });
     }
   }

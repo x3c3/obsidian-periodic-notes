@@ -13,7 +13,10 @@ function createRouter() {
   return {
     subscribe,
     set,
-    navigate: (path: string[], eState?: Record<string, string | number | boolean>) =>
+    navigate: (
+      path: string[],
+      eState?: Record<string, string | number | boolean>,
+    ) =>
       set({
         path,
         eState: eState ?? {},

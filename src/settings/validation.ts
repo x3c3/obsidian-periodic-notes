@@ -1,4 +1,4 @@
-import { App, normalizePath, TFile } from "obsidian";
+import { type App, normalizePath, type TFile } from "obsidian";
 import type { Granularity } from "src/types";
 
 export function removeEscapedCharacters(format: string): string {
@@ -14,11 +14,12 @@ function pathWithoutExtension(file: TFile): string {
 
 export function getBasename(format: string): string {
   const isTemplateNested = format.indexOf("/") !== -1;
-  return isTemplateNested ? format.split("/").pop() ?? "" : format;
+  return isTemplateNested ? (format.split("/").pop() ?? "") : format;
 }
 
 function isValidFilename(filename: string): boolean {
   const illegalRe = /[?<>\\:*|"]/g;
+  // biome-ignore lint/suspicious/noControlCharactersInRegex: intentional filename validation
   const controlRe = /[\x00-\x1f\x80-\x9f]/g;
   const reservedRe = /^\.+$/;
   const windowsReservedRe = /^(con|prn|aux|nul|com[0-9]|lpt[0-9])(\..*)?$/i;
@@ -31,7 +32,10 @@ function isValidFilename(filename: string): boolean {
   );
 }
 
-export function validateFormat(format: string, granularity: Granularity): string {
+export function validateFormat(
+  format: string,
+  granularity: Granularity,
+): string {
   if (!format) {
     return "";
   }
@@ -54,7 +58,7 @@ export function validateFormat(format: string, granularity: Granularity): string
 
 export function validateFormatComplexity(
   format: string,
-  granularity: Granularity
+  granularity: Granularity,
 ): "valid" | "fragile-basename" | "loose-parsing" {
   const testFormattedDate = window.moment().format(format);
   const parsedDate = window.moment(testFormattedDate, format, true);
@@ -71,7 +75,7 @@ export function validateFormatComplexity(
           getBasename(format)
             .replace(/\[[^\]]*\]/g, "") // remove everything within brackets
             .toLowerCase()
-            .indexOf(requiredChar) !== -1
+            .indexOf(requiredChar) !== -1,
       )
     ) {
       return "fragile-basename";
@@ -84,7 +88,7 @@ export function validateFormatComplexity(
 export function getDateInput(
   file: TFile,
   format: string,
-  granularity: Granularity
+  granularity: Granularity,
 ): string {
   // pseudo-intelligently find files when the format is YYYY/MM/DD for example
   if (validateFormatComplexity(format, granularity) === "fragile-basename") {

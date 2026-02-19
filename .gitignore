@@ -1,19 +1,31 @@
-node_modules/
+# Build output
 dist/
-.vscode/
-*.code-workspace
+*.js.map
 
-.DS_Store
+# Dependencies
+node_modules/
 
-.yarn/*
-!.yarn/cache
-!.yarn/releases
-!.yarn/plugins
-!.yarn/sdks
-!.yarn/versions
+# Bun
+.bun/
+bun.lockb
 
+# Environment
 .env
+.env.local
 
-styles.css
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Obsidian
 data.json
-main.js
+
+# Claude Code
+.claude/settings.local.json

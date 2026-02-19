@@ -16,14 +16,14 @@ declare module "obsidian" {
     on(
       name: "periodic-notes:settings-updated",
       callback: () => void,
-      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-      ctx?: any
+      // biome-ignore lint/suspicious/noExplicitAny: Obsidian API lacks type
+      ctx?: any,
     ): EventRef;
     on(
       name: "periodic-notes:resolve",
       callback: () => void,
-      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-      ctx?: any
+      // biome-ignore lint/suspicious/noExplicitAny: Obsidian API lacks type
+      ctx?: any,
     ): EventRef;
   }
 
@@ -41,7 +41,7 @@ declare module "obsidian" {
   }
 
   interface Editor {
-    cm: CodeMirror.Editor;
+    cm: unknown;
   }
 
   interface EditorSuggestManager {
@@ -85,6 +85,7 @@ declare module "obsidian" {
   interface Vault {
     config: Record<string, unknown>;
     getConfig<T extends keyof VaultSettings>(setting: T): VaultSettings[T];
+    // biome-ignore lint/suspicious/noExplicitAny: Obsidian API lacks type
     setConfig<T extends keyof VaultSettings>(setting: T, value: any): void;
   }
 

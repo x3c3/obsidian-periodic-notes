@@ -5,7 +5,7 @@
   let iconEl: HTMLElement;
 
   onMount(() => {
-    setIcon(iconEl, "forward-arrow", 12);
+    setIcon(iconEl, "arrow-right");
   });
 </script>
 

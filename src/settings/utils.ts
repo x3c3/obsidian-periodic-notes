@@ -1,24 +1,29 @@
 import cloneDeep from "lodash/cloneDeep";
-import { App, DailyNotesPlugin, type DailyNotesSettings } from "obsidian";
+import type { App, DailyNotesPlugin, DailyNotesSettings } from "obsidian";
 import {
-  granularities,
   type CalendarSet,
   type Granularity,
+  granularities,
   type PeriodicConfig,
 } from "src/types";
 import { get, type Updater, type Writable } from "svelte/store";
 
 import { DEFAULT_PERIODIC_CONFIG, type ISettings } from ".";
 
-const defaultPeriodicSettings = granularities.reduce((acc, g) => {
-  acc[g] = { ...DEFAULT_PERIODIC_CONFIG };
-  return acc;
-}, {} as Record<Granularity, PeriodicConfig>);
+const defaultPeriodicSettings = granularities.reduce(
+  (acc, g) => {
+    acc[g] = { ...DEFAULT_PERIODIC_CONFIG };
+    return acc;
+  },
+  {} as Record<Granularity, PeriodicConfig>,
+);
 
 type DeleteFunc = (calendarSetId: string) => Updater<ISettings>;
 export const deleteCalendarSet: DeleteFunc = (calendarSetId: string) => {
   return (settings: ISettings) => {
-    const calendarSet = settings.calendarSets.find((c) => c.id === calendarSetId);
+    const calendarSet = settings.calendarSets.find(
+      (c) => c.id === calendarSetId,
+    );
     if (calendarSet) {
       settings.calendarSets.remove(calendarSet);
     }
@@ -34,11 +39,11 @@ export const deleteCalendarSet: DeleteFunc = (calendarSetId: string) => {
 
 type CreateFunc = (
   calendarSetId: string,
-  refSettings?: Partial<CalendarSet>
+  refSettings?: Partial<CalendarSet>,
 ) => Updater<ISettings>;
 export const createNewCalendarSet: CreateFunc = (
   id: string,
-  refSettings?: Partial<CalendarSet>
+  refSettings?: Partial<CalendarSet>,
 ) => {
   return (settings: ISettings) => {
     settings.calendarSets.push({
@@ -53,7 +58,7 @@ export const createNewCalendarSet: CreateFunc = (
 
 type UpdateActiveFunc = (
   calendarSetId: string,
-  refSettings?: Partial<CalendarSet>
+  refSettings?: Partial<CalendarSet>,
 ) => Updater<ISettings>;
 export const setActiveSet: UpdateActiveFunc = (id: string) => {
   return (settings: ISettings) => {
@@ -66,7 +71,7 @@ export const clearStartupNote: Updater<ISettings> = (settings: ISettings) => {
   for (const calendarSet of settings.calendarSets) {
     for (const granularity of granularities) {
       const config = calendarSet[granularity];
-      if (config && config.openAtStartup) {
+      if (config?.openAtStartup) {
         config.openAtStartup = false;
       }
     }
@@ -80,16 +85,16 @@ interface StartupNoteConfig {
 }
 
 type FindStartupNoteConfigFunc = (
-  settings: Writable<ISettings>
+  settings: Writable<ISettings>,
 ) => StartupNoteConfig | null;
 export const findStartupNoteConfig: FindStartupNoteConfigFunc = (
-  settings: Writable<ISettings>
+  settings: Writable<ISettings>,
 ) => {
   const calendarSets = get(settings).calendarSets;
   for (const calendarSet of calendarSets) {
     for (const granularity of granularities) {
       const config = calendarSet[granularity];
-      if (config && config.openAtStartup) {
+      if (config?.openAtStartup) {
         return {
           calendarSet: calendarSet.id,
           granularity,
@@ -106,10 +111,12 @@ export const wrapAround = (value: number, size: number): number => {
 };
 
 export function isDailyNotesPluginEnabled(app: App): boolean {
+  // private API: app.internalPlugins is undocumented
   return app.internalPlugins.getPluginById("daily-notes").enabled;
 }
 
 function getDailyNotesPlugin(app: App): DailyNotesPlugin | null {
+  // private API: app.internalPlugins is undocumented
   const installedPlugin = app.internalPlugins.getPluginById("daily-notes");
   if (installedPlugin) {
     return installedPlugin.instance as DailyNotesPlugin;
@@ -123,6 +130,7 @@ export function hasLegacyDailyNoteSettings(app: App): boolean {
 }
 
 export function getLegacyDailyNoteSettings(app: App): DailyNotesSettings {
+  // private API: app.internalPlugins is undocumented
   const dailyNotesInstalledPlugin = app.internalPlugins.plugins["daily-notes"];
   if (!dailyNotesInstalledPlugin) {
     return {
@@ -146,6 +154,7 @@ export function getLegacyDailyNoteSettings(app: App): DailyNotesSettings {
 }
 
 export function disableDailyNotesPlugin(app: App): void {
+  // private API: app.internalPlugins is undocumented
   app.internalPlugins.getPluginById("daily-notes").disable(true);
 }
 

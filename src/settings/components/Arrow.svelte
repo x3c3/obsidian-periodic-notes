@@ -7,7 +7,7 @@
   let arrowEl: HTMLElement;
 
   onMount(() => {
-    setIcon(arrowEl, "chevron-right", 16);
+    setIcon(arrowEl, "chevron-right");
   });
 </script>
 

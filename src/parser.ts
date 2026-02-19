@@ -8,7 +8,8 @@ interface ParseData {
 }
 
 // TODO rename these to remove 'prefix'
-const FULL_DATE_PREFIX = /(\d{4})[-.]?(0[1-9]|1[0-2])[-.]?(0[1-9]|[12][0-9]|3[01])/;
+const FULL_DATE_PREFIX =
+  /(\d{4})[-.]?(0[1-9]|1[0-2])[-.]?(0[1-9]|[12][0-9]|3[01])/;
 const MONTH_PREFIX = /(\d{4})[-.]?(0[1-9]|1[0-2])/;
 // const WEEK_PREFIX = /(\d{4})[-. ]?W(\d{2})/;
 const YEAR_PREFIX = /(\d{4})/;

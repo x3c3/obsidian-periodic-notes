@@ -46,7 +46,7 @@
   }
 
   function toggleOptionsMenu(evt: MouseEvent) {
-    const menu = new Menu(app);
+    const menu = new Menu();
 
     if (!isActive) {
       menu
@@ -101,7 +101,7 @@
   }
 
   onMount(() => {
-    setIcon(optionsEl, "more-vertical", 18);
+    setIcon(optionsEl, "more-vertical");
     document.getElementsByClassName("vertical-tab-content")[0].scroll(0, 0);
 
     if ($router.eState["shouldRename"]) {

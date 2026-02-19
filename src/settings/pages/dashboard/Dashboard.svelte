@@ -44,7 +44,7 @@
   }
 
   onMount(() => {
-    setIcon(addEl, "plus", 16);
+    setIcon(addEl, "plus");
   });
 </script>
 
@@ -106,7 +106,7 @@
     onChange={(e) => {
       const val = e.target.value;
       $localization.weekStart = val;
-      app.vault.setConfig("weekStart", val);
+      app.vault.setConfig("weekStart", val); // private API: vault.setConfig is undocumented
     }}
   />
 </SettingItem>
@@ -124,7 +124,7 @@
     onChange={(e) => {
       const val = e.target.value;
       $localization.localeOverride = val;
-      app.vault.setConfig("weekStart", val);
+      app.vault.setConfig("weekStart", val); // private API: vault.setConfig is undocumented
     }}
   />
 </SettingItem>

@@ -1,6 +1,5 @@
 import type { WeekSpec } from "moment";
-import { App } from "obsidian";
-import type { Writable } from "svelte/store";
+import type { App } from "obsidian";
 
 declare global {
   interface Window {
@@ -67,7 +66,7 @@ function overrideGlobalMomentWeekStart(weekStart: IWeekStartOption): void {
   // Save the initial locale weekspec so that we can restore
   // it when toggling between the different options in settings.
   if (!window._bundledLocaleWeekSpec) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // biome-ignore lint/suspicious/noExplicitAny: Obsidian API lacks type
     window._bundledLocaleWeekSpec = (<any>moment.localeData())._week;
   }
 
@@ -92,7 +91,7 @@ function overrideGlobalMomentWeekStart(weekStart: IWeekStartOption): void {
  */
 export function configureGlobalMomentLocale(
   localeOverride: ILocaleOverride = "system-default",
-  weekStart: IWeekStartOption = "locale"
+  weekStart: IWeekStartOption = "locale",
 ): string {
   const obsidianLang = localStorage.getItem("language") || "en";
   const systemLang = navigator.language?.toLowerCase();
@@ -108,7 +107,7 @@ export function configureGlobalMomentLocale(
 
   const currentLocale = window.moment.locale(momentLocale);
   console.debug(
-    `[Periodic Notes] Trying to switch Moment.js global locale to ${momentLocale}, got ${currentLocale}`
+    `[Periodic Notes] Trying to switch Moment.js global locale to ${momentLocale}, got ${currentLocale}`,
   );
 
   overrideGlobalMomentWeekStart(weekStart);
@@ -130,7 +129,9 @@ export function initializeLocaleConfigOnce(app: App) {
 }
 
 export function getLocalizationSettings(app: App): ILocalizationSettings {
-  const localeOverride = app.vault.getConfig("localeOverride") ?? "system-default";
+  // private API: vault.getConfig is undocumented
+  const localeOverride =
+    app.vault.getConfig("localeOverride") ?? "system-default";
   const weekStart = app.vault.getConfig("weekStart") ?? "locale";
   return { localeOverride, weekStart };
 }
