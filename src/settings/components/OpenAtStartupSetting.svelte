@@ -6,10 +6,10 @@
 
   import SettingItem from "./SettingItem.svelte";
   import Toggle from "./Toggle.svelte";
-  import type { ISettings } from "..";
+  import type { Settings } from "..";
   import { clearStartupNote } from "../utils";
 
-  let { config, settings, granularity }: { config: Writable<PeriodicConfig>; settings: Writable<ISettings>; granularity: Granularity } = $props();
+  let { config, settings, granularity }: { config: Writable<PeriodicConfig>; settings: Writable<Settings>; granularity: Granularity } = $props();
 </script>
 
 <SettingItem

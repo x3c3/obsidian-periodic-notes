@@ -10,7 +10,7 @@
   import type { Granularity } from "src/types";
   import Arrow from "src/settings/components/Arrow.svelte";
   import { DEFAULT_PERIODIC_CONFIG } from "src/settings";
-  import type { ISettings } from "src/settings";
+  import type { Settings } from "src/settings";
   import type { Writable } from "svelte/store";
   import writableDerived from "svelte-writable-derived";
   import OpenAtStartupSetting from "src/settings/components/OpenAtStartupSetting.svelte";
@@ -19,7 +19,7 @@
     app: App;
     calendarSetId: string;
     granularity: Granularity;
-    settings: Writable<ISettings>;
+    settings: Writable<Settings>;
   } = $props();
 
   let displayConfig = $derived(displayConfigs[granularity]);

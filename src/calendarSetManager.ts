@@ -1,6 +1,6 @@
 import type { DailyNotesSettings } from "obsidian";
-import type PeriodicNotesPlugin from "src/main";
 import { get } from "svelte/store";
+import type PeriodicNotesPlugin from "./main";
 
 import {
   type CalendarSet,
@@ -10,31 +10,31 @@ import {
 } from "./types";
 import { getConfig, getFormat } from "./utils";
 
-interface IPerioditySettings {
+interface PeriodicitySettings {
   enabled: boolean;
   folder?: string;
   format?: string;
   template?: string;
 }
 
-interface ILegacySettings {
+interface LegacySettings {
   showGettingStartedBanner: boolean;
   hasMigratedDailyNoteSettings: boolean;
   hasMigratedWeeklyNoteSettings: boolean;
 
-  daily: IPerioditySettings;
-  weekly: IPerioditySettings;
-  monthly: IPerioditySettings;
-  quarterly: IPerioditySettings;
-  yearly: IPerioditySettings;
+  daily: PeriodicitySettings;
+  weekly: PeriodicitySettings;
+  monthly: PeriodicitySettings;
+  quarterly: PeriodicitySettings;
+  yearly: PeriodicitySettings;
 }
 
 export const DEFAULT_CALENDARSET_ID = "Default";
 
 export function isLegacySettings(
   settings: unknown,
-): settings is ILegacySettings {
-  const maybeLegacySettings = settings as ILegacySettings;
+): settings is LegacySettings {
+  const maybeLegacySettings = settings as LegacySettings;
   return !!(
     maybeLegacySettings.daily ||
     maybeLegacySettings.weekly ||
@@ -45,7 +45,7 @@ export function isLegacySettings(
 }
 
 export function migrateDailyNoteSettings(
-  settings: ILegacySettings,
+  settings: LegacySettings,
 ): CalendarSet {
   const migrateConfig = (settings: DailyNotesSettings) => {
     return {
@@ -65,9 +65,9 @@ export function migrateDailyNoteSettings(
 }
 
 export function migrateLegacySettingsToCalendarSet(
-  settings: ILegacySettings,
+  settings: LegacySettings,
 ): CalendarSet {
-  const migrateConfig = (settings: ILegacySettings["daily"]) => {
+  const migrateConfig = (settings: LegacySettings["daily"]) => {
     return {
       enabled: settings.enabled,
       format: settings.format || "",

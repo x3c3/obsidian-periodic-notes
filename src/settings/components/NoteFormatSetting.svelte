@@ -9,11 +9,11 @@
 
   let { granularity, config }: { granularity: Granularity; config: Readable<PeriodicConfig> } = $props();
 
-  const defaultFormat = $derived(DEFAULT_FORMAT[granularity]);
-
   let inputEl: HTMLInputElement;
   let error = $state("");
   let warning = $state("");
+
+  const defaultFormat = $derived(DEFAULT_FORMAT[granularity]);
   let value = $derived($config.format || "");
 
   $effect(() => {

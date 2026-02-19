@@ -21,8 +21,8 @@ import { showFileMenu } from "./modal";
 import {
   DEFAULT_PERIODIC_CONFIG,
   DEFAULT_SETTINGS,
-  type ISettings,
   PeriodicNotesSettingsTab,
+  type Settings,
 } from "./settings";
 import { initializeLocaleConfigOnce } from "./settings/localization";
 import {
@@ -42,13 +42,13 @@ import {
   isMetaPressed,
 } from "./utils";
 
-interface IOpenOpts {
+interface OpenOpts {
   inNewSplit?: boolean;
   calendarSet?: string;
 }
 
 export default class PeriodicNotesPlugin extends Plugin {
-  public settings!: Writable<ISettings>;
+  public settings!: Writable<Settings>;
   private ribbonEl!: HTMLElement | null;
 
   private cache!: PeriodicNotesCache;
@@ -67,7 +67,7 @@ export default class PeriodicNotesPlugin extends Plugin {
     addIcon("calendar-quarter", calendarQuarterIcon);
     addIcon("calendar-year", calendarYearIcon);
 
-    this.settings = writable<ISettings>();
+    this.settings = writable<Settings>();
     await this.loadSettings();
     this.register(this.settings.subscribe(this.onUpdateSettings.bind(this)));
 
@@ -204,7 +204,7 @@ export default class PeriodicNotesPlugin extends Plugin {
     }
   }
 
-  private async onUpdateSettings(newSettings: ISettings): Promise<void> {
+  private async onUpdateSettings(newSettings: Settings): Promise<void> {
     await this.saveData(newSettings);
     this.configureCommands();
     this.configureRibbonIcons();
@@ -276,7 +276,7 @@ export default class PeriodicNotesPlugin extends Plugin {
   public async openPeriodicNote(
     granularity: Granularity,
     date: Moment,
-    opts?: IOpenOpts,
+    opts?: OpenOpts,
   ): Promise<void> {
     const { inNewSplit = false, calendarSet } = opts ?? {};
     const { workspace } = this.app;

@@ -4,7 +4,7 @@
   import capitalize from "lodash/capitalize";
 
   import type { Granularity, PeriodicConfig } from "src/types";
-  import { FileSuggest } from "src/ui/file-suggest";
+  import { FileSuggest } from "src/ui/fileSuggest";
   import { displayConfigs } from "src/commands";
 
   import { validateTemplate } from "../validation";

@@ -1,15 +1,15 @@
 import { type App, type Command, Notice, TFile } from "obsidian";
-import type PeriodicNotesPlugin from "src/main";
+import type PeriodicNotesPlugin from "./main";
 
 import type { Granularity } from "./types";
 
-interface IDisplayConfig {
+interface DisplayConfig {
   periodicity: string;
   relativeUnit: string;
   labelOpenPresent: string;
 }
 
-export const displayConfigs: Record<Granularity, IDisplayConfig> = {
+export const displayConfigs: Record<Granularity, DisplayConfig> = {
   day: {
     periodicity: "daily",
     relativeUnit: "today",

@@ -8,7 +8,7 @@ import {
 } from "src/types";
 import { get, type Updater, type Writable } from "svelte/store";
 
-import { DEFAULT_PERIODIC_CONFIG, type ISettings } from ".";
+import { DEFAULT_PERIODIC_CONFIG, type Settings } from ".";
 
 const defaultPeriodicSettings = granularities.reduce(
   (acc, g) => {
@@ -18,9 +18,9 @@ const defaultPeriodicSettings = granularities.reduce(
   {} as Record<Granularity, PeriodicConfig>,
 );
 
-type DeleteFunc = (calendarSetId: string) => Updater<ISettings>;
+type DeleteFunc = (calendarSetId: string) => Updater<Settings>;
 export const deleteCalendarSet: DeleteFunc = (calendarSetId: string) => {
-  return (settings: ISettings) => {
+  return (settings: Settings) => {
     const calendarSet = settings.calendarSets.find(
       (c) => c.id === calendarSetId,
     );
@@ -40,12 +40,12 @@ export const deleteCalendarSet: DeleteFunc = (calendarSetId: string) => {
 type CreateFunc = (
   calendarSetId: string,
   refSettings?: Partial<CalendarSet>,
-) => Updater<ISettings>;
+) => Updater<Settings>;
 export const createNewCalendarSet: CreateFunc = (
   id: string,
   refSettings?: Partial<CalendarSet>,
 ) => {
-  return (settings: ISettings) => {
+  return (settings: Settings) => {
     settings.calendarSets.push({
       ...cloneDeep(defaultPeriodicSettings),
       ...cloneDeep(refSettings),
@@ -59,15 +59,15 @@ export const createNewCalendarSet: CreateFunc = (
 type UpdateActiveFunc = (
   calendarSetId: string,
   refSettings?: Partial<CalendarSet>,
-) => Updater<ISettings>;
+) => Updater<Settings>;
 export const setActiveSet: UpdateActiveFunc = (id: string) => {
-  return (settings: ISettings) => {
+  return (settings: Settings) => {
     settings.activeCalendarSet = id;
     return settings;
   };
 };
 
-export const clearStartupNote: Updater<ISettings> = (settings: ISettings) => {
+export const clearStartupNote: Updater<Settings> = (settings: Settings) => {
   for (const calendarSet of settings.calendarSets) {
     for (const granularity of granularities) {
       const config = calendarSet[granularity];
@@ -85,10 +85,10 @@ interface StartupNoteConfig {
 }
 
 type FindStartupNoteConfigFunc = (
-  settings: Writable<ISettings>,
+  settings: Writable<Settings>,
 ) => StartupNoteConfig | null;
 export const findStartupNoteConfig: FindStartupNoteConfigFunc = (
-  settings: Writable<ISettings>,
+  settings: Writable<Settings>,
 ) => {
   const calendarSets = get(settings).calendarSets;
   for (const calendarSet of calendarSets) {

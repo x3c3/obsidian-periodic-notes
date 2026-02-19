@@ -8,9 +8,9 @@ declare global {
   }
 }
 
-type ILocaleOverride = "system-default" | string;
+type LocaleOverride = "system-default" | string;
 
-export type IWeekStartOption =
+export type WeekStartOption =
   | "sunday"
   | "monday"
   | "tuesday"
@@ -55,12 +55,12 @@ const weekdays = [
   "saturday",
 ];
 
-export interface ILocalizationSettings {
-  localeOverride: ILocaleOverride;
-  weekStart: IWeekStartOption;
+export interface LocalizationSettings {
+  localeOverride: LocaleOverride;
+  weekStart: WeekStartOption;
 }
 
-function overrideGlobalMomentWeekStart(weekStart: IWeekStartOption): void {
+function overrideGlobalMomentWeekStart(weekStart: WeekStartOption): void {
   const { moment } = window;
   const currentLocale = moment.locale();
 
@@ -91,8 +91,8 @@ function overrideGlobalMomentWeekStart(weekStart: IWeekStartOption): void {
  * @param localeOverride locale string (e.g. "en-US")
  */
 export function configureGlobalMomentLocale(
-  localeOverride: ILocaleOverride = "system-default",
-  weekStart: IWeekStartOption = "locale",
+  localeOverride: LocaleOverride = "system-default",
+  weekStart: WeekStartOption = "locale",
 ): string {
   const obsidianLang = localStorage.getItem("language") || "en";
   const systemLang = navigator.language?.toLowerCase();
@@ -129,7 +129,7 @@ export function initializeLocaleConfigOnce(app: App) {
   window._hasConfiguredLocale = true;
 }
 
-export function getLocalizationSettings(app: App): ILocalizationSettings {
+export function getLocalizationSettings(app: App): LocalizationSettings {
   // private API: vault.getConfig is undocumented
   const localeOverride =
     app.vault.getConfig("localeOverride") ?? "system-default";

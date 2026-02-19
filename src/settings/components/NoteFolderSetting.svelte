@@ -2,7 +2,7 @@
   import type { App } from "obsidian";
   import type { Readable } from "svelte/store";
 
-  import { FolderSuggest } from "src/ui/file-suggest";
+  import { FolderSuggest } from "src/ui/fileSuggest";
   import type { Granularity, PeriodicConfig } from "src/types";
   import { displayConfigs } from "src/commands";
 

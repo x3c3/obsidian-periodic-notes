@@ -3,21 +3,10 @@ import { DEFAULT_CALENDARSET_ID } from "src/calendarSetManager";
 import type { CalendarSet, PeriodicConfig } from "src/types";
 import { mount, unmount } from "svelte";
 
-import type WeeklyNotesPlugin from "../main";
+import type PeriodicNotesPlugin from "../main";
 import SettingsRouter from "./pages/Router.svelte";
 
-export type ILocaleOverride = "system-default" | string;
-export type IWeekStartOption =
-  | "sunday"
-  | "monday"
-  | "tuesday"
-  | "wednesday"
-  | "thursday"
-  | "friday"
-  | "saturday"
-  | "locale";
-
-export interface ISettings {
+export interface Settings {
   showGettingStartedBanner: boolean;
   hasMigratedDailyNoteSettings: boolean;
   hasMigratedWeeklyNoteSettings: boolean;
@@ -29,7 +18,7 @@ export interface ISettings {
   enableTimelineComplication: boolean;
 }
 
-export const DEFAULT_SETTINGS: ISettings = {
+export const DEFAULT_SETTINGS: Settings = {
   // Onboarding
   installedVersion: "1.0.0-beta3",
   showGettingStartedBanner: true,
@@ -58,7 +47,7 @@ export class PeriodicNotesSettingsTab extends PluginSettingTab {
 
   constructor(
     readonly app: App,
-    readonly plugin: WeeklyNotesPlugin,
+    readonly plugin: PeriodicNotesPlugin,
   ) {
     super(app, plugin);
     this.plugin = plugin;

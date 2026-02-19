@@ -4,7 +4,7 @@
 
   import CalendarSetManager from "src/calendarSetManager";
   import { router } from "src/settings/stores";
-  import type { ISettings } from "src/settings/index";
+  import type { Settings } from "src/settings/index";
   import Dropdown from "src/settings/components/Dropdown.svelte";
   import Footer from "src/settings/components/Footer.svelte";
   import SettingItem from "src/settings/components/SettingItem.svelte";
@@ -16,18 +16,18 @@
   } from "src/settings/utils";
   import {
     configureGlobalMomentLocale,
-    type ILocalizationSettings,
-    type IWeekStartOption,
+    type LocalizationSettings,
+    type WeekStartOption,
   } from "src/settings/localization";
 
   import GettingStartedBanner from "./GettingStartedBanner.svelte";
-  import CalendarSetMenuItem from "./CalendarSets/MenuItem.svelte";
+  import CalendarSetMenuItem from "./calendarSets/MenuItem.svelte";
 
   let { app, manager, localization, settings }: {
     app: App;
     manager: CalendarSetManager;
-    localization: Writable<ILocalizationSettings>;
-    settings: Writable<ISettings>;
+    localization: Writable<LocalizationSettings>;
+    settings: Writable<Settings>;
   } = $props();
 
   let addEl: HTMLElement;
@@ -106,7 +106,7 @@
       options={getWeekStartOptions()}
       value={$localization.weekStart}
       onChange={(e) => {
-        const val = (e.target as HTMLSelectElement).value as IWeekStartOption;
+        const val = (e.target as HTMLSelectElement).value as WeekStartOption;
         $localization.weekStart = val;
         app.vault.setConfig("weekStart", val);
       }}

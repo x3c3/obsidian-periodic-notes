@@ -9,7 +9,7 @@
   import { displayConfigs } from "src/commands";
   import CalendarSetManager from "src/calendarSetManager";
   import { router } from "src/settings/stores";
-  import type { ISettings } from "src/settings";
+  import type { Settings } from "src/settings";
   import {
     createNewCalendarSet,
     deleteCalendarSet,
@@ -20,7 +20,7 @@
     viewDetails: () => void;
     calendarSet: CalendarSet;
     manager: CalendarSetManager;
-    settings: Writable<ISettings>;
+    settings: Writable<Settings>;
   } = $props();
 
   let optionsEl: HTMLDivElement;

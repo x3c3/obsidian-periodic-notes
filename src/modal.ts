@@ -1,7 +1,6 @@
 import { type App, Menu, type Point } from "obsidian";
-import type PeriodicNotesPlugin from "src/main";
-
 import { displayConfigs } from "./commands";
+import type PeriodicNotesPlugin from "./main";
 
 export function showFileMenu(
   _app: App,

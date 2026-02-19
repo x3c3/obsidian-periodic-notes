@@ -1,12 +1,12 @@
 import { writable } from "svelte/store";
 
-interface IRouter {
+interface RouterState {
   path: string[];
   eState: Record<string, string | number | boolean>;
 }
 
 function createRouter() {
-  const { subscribe, set, update } = writable<IRouter>({
+  const { subscribe, set, update } = writable<RouterState>({
     path: ["Periodic Notes"],
     eState: {},
   });

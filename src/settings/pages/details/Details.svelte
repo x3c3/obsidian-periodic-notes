@@ -1,22 +1,23 @@
 <script lang="ts">
   import type { App } from "obsidian";
   import { Menu, setIcon } from "obsidian";
+  import type { Writable } from "svelte/store";
+
   import type CalendarSetManager from "src/calendarSetManager";
-  import type { ISettings } from "src/settings";
+  import type { Settings } from "src/settings";
   import { router } from "src/settings/stores";
   import {
     createNewCalendarSet,
     deleteCalendarSet,
     setActiveSet,
   } from "src/settings/utils";
-
   import { granularities } from "src/types";
-  import type { Writable } from "svelte/store";
+
   import PeriodicGroup from "./PeriodicGroup.svelte";
 
   let { app, settings, manager, selectedCalendarSet }: {
     app: App;
-    settings: Writable<ISettings>;
+    settings: Writable<Settings>;
     manager: CalendarSetManager;
     selectedCalendarSet: string;
   } = $props();

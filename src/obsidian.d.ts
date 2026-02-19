@@ -1,5 +1,5 @@
 import "obsidian";
-import type { ILocaleOverride, IWeekStartOption } from "./settings";
+import type { LocaleOverride, WeekStartOption } from "./settings/localization";
 
 declare module "obsidian" {
   export interface Workspace extends Events {
@@ -22,8 +22,8 @@ declare module "obsidian" {
   }
 
   interface VaultSettings {
-    localeOverride: ILocaleOverride;
-    weekStart: IWeekStartOption;
+    localeOverride: LocaleOverride;
+    weekStart: WeekStartOption;
   }
 
   interface Vault {

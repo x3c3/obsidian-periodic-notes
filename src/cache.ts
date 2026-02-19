@@ -20,7 +20,7 @@ import { applyPeriodicTemplateToFile, getPossibleFormats } from "./utils";
 
 export type MatchType = "filename" | "frontmatter" | "date-prefixed";
 
-interface PeriodicNoteMatchMatchData {
+interface PeriodicNoteMatchData {
   /* where was the date found */
   matchType: MatchType;
   /* XXX: keep ZK matches in the cache, should this be separate from formats with HH:mm in them? */
@@ -47,7 +47,7 @@ export interface PeriodicNoteCachedMetadata {
   canonicalDateStr: string;
 
   /* "how" the match was made */
-  matchData: PeriodicNoteMatchMatchData;
+  matchData: PeriodicNoteMatchData;
 }
 
 function getCanonicalDateString(

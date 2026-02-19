@@ -1,10 +1,10 @@
 <script lang="ts">
-  interface IOption {
+  interface SelectOption {
     label: string;
     value: string;
   }
 
-  let { onChange, options = [], value }: { onChange: (e: Event) => void; options?: IOption[]; value: string } = $props();
+  let { onChange, options = [], value }: { onChange: (e: Event) => void; options?: SelectOption[]; value: string } = $props();
 </script>
 
 <select class="dropdown" onchange={onChange} {value}>
