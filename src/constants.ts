@@ -12,6 +12,8 @@ export const DEFAULT_FORMAT = Object.freeze({
   year: DEFAULT_YEARLY_NOTE_FORMAT,
 });
 
+export const DEFAULT_CALENDARSET_ID = "Default";
+
 export const HUMANIZE_FORMAT = Object.freeze({
   month: "MMMM YYYY",
   quarter: "YYYY Q[Q]",

@@ -22,6 +22,16 @@ export interface PeriodicConfig {
   templatePath?: string;
 }
 
+export interface DateNavigationItem {
+  granularity: Granularity;
+  date: import("moment").Moment;
+  label: string;
+  matchData?: {
+    exact: boolean;
+    matchType: import("./cache").MatchType;
+  };
+}
+
 export interface CalendarSet {
   id: string;
   ctime: string;

@@ -1,7 +1,7 @@
 import type { DailyNotesSettings } from "obsidian";
 import { get } from "svelte/store";
+import { DEFAULT_CALENDARSET_ID } from "./constants";
 import type PeriodicNotesPlugin from "./main";
-
 import {
   type CalendarSet,
   type Granularity,
@@ -28,8 +28,6 @@ interface LegacySettings {
   quarterly: PeriodicitySettings;
   yearly: PeriodicitySettings;
 }
-
-export const DEFAULT_CALENDARSET_ID = "Default";
 
 export function isLegacySettings(
   settings: unknown,

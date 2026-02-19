@@ -4,12 +4,12 @@ import { type Writable, writable } from "svelte/store";
 
 import { type PeriodicNoteCachedMetadata, PeriodicNotesCache } from "./cache";
 import CalendarSetManager, {
-  DEFAULT_CALENDARSET_ID,
   isLegacySettings,
   migrateDailyNoteSettings,
   migrateLegacySettingsToCalendarSet,
 } from "./calendarSetManager";
 import { displayConfigs, getCommands } from "./commands";
+import { DEFAULT_CALENDARSET_ID } from "./constants";
 import {
   calendarDayIcon,
   calendarMonthIcon,

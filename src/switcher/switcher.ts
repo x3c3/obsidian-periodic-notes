@@ -1,6 +1,5 @@
 import type { Moment } from "moment";
 import { type App, type NLDatesPlugin, SuggestModal, setIcon } from "obsidian";
-import type { MatchType } from "src/cache";
 import type PeriodicNotesPlugin from "src/main";
 import {
   getFolder,
@@ -11,18 +10,8 @@ import {
   join,
 } from "src/utils";
 
-import type { Granularity } from "../types";
+import type { DateNavigationItem, Granularity } from "../types";
 import { RelatedFilesSwitcher } from "./relatedFilesSwitcher";
-
-export interface DateNavigationItem {
-  granularity: Granularity;
-  date: Moment;
-  label: string;
-  matchData?: {
-    exact: boolean;
-    matchType: MatchType;
-  };
-}
 
 const DEFAULT_INSTRUCTIONS = [
   { command: "⇥", purpose: "show related files" },

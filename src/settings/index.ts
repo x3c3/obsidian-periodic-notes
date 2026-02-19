@@ -1,5 +1,5 @@
 import { type App, PluginSettingTab } from "obsidian";
-import { DEFAULT_CALENDARSET_ID } from "src/calendarSetManager";
+import { DEFAULT_CALENDARSET_ID } from "src/constants";
 import type { CalendarSet, PeriodicConfig } from "src/types";
 import { mount, unmount } from "svelte";
 
