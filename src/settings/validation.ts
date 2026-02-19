@@ -12,7 +12,7 @@ function pathWithoutExtension(file: TFile): string {
   return file.path.slice(0, -extLen);
 }
 
-export function getBasename(format: string): string {
+function getBasename(format: string): string {
   const isTemplateNested = format.indexOf("/") !== -1;
   return isTemplateNested ? (format.split("/").pop() ?? "") : format;
 }

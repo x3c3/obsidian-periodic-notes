@@ -1,9 +1,3 @@
-export type IPeriodicity =
-  | "daily"
-  | "weekly"
-  | "monthly"
-  | "quarterly"
-  | "yearly";
 export type Granularity =
   | "day"
   | "week"

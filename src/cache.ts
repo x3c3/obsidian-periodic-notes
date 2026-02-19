@@ -20,7 +20,7 @@ import { applyPeriodicTemplateToFile, getPossibleFormats } from "./utils";
 
 export type MatchType = "filename" | "frontmatter" | "date-prefixed";
 
-export interface PeriodicNoteMatchMatchData {
+interface PeriodicNoteMatchMatchData {
   /* where was the date found */
   matchType: MatchType;
   /* XXX: keep ZK matches in the cache, should this be separate from formats with HH:mm in them? */

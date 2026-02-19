@@ -1,5 +1,5 @@
 import cloneDeep from "lodash/cloneDeep";
-import type { App, DailyNotesPlugin, DailyNotesSettings } from "obsidian";
+import type { App, DailyNotesPlugin } from "obsidian";
 import {
   type CalendarSet,
   type Granularity,
@@ -127,30 +127,6 @@ function getDailyNotesPlugin(app: App): DailyNotesPlugin | null {
 export function hasLegacyDailyNoteSettings(app: App): boolean {
   const options = getDailyNotesPlugin(app)?.options || {};
   return !!(options.format || options.folder || options.template);
-}
-
-export function getLegacyDailyNoteSettings(app: App): DailyNotesSettings {
-  // private API: app.internalPlugins is undocumented
-  const dailyNotesInstalledPlugin = app.internalPlugins.plugins["daily-notes"];
-  if (!dailyNotesInstalledPlugin) {
-    return {
-      folder: "",
-      template: "",
-      format: "",
-    };
-  }
-
-  const options = {
-    format: "",
-    folder: "",
-    template: "",
-    ...getDailyNotesPlugin(app)?.options,
-  };
-  return {
-    format: options.format,
-    folder: options.folder?.trim(),
-    template: options.template?.trim(),
-  };
 }
 
 export function disableDailyNotesPlugin(app: App): void {

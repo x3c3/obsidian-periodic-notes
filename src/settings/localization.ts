@@ -8,7 +8,8 @@ declare global {
   }
 }
 
-export type ILocaleOverride = "system-default" | string;
+type ILocaleOverride = "system-default" | string;
+
 export type IWeekStartOption =
   | "sunday"
   | "monday"

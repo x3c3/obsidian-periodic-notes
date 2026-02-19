@@ -39,7 +39,7 @@ function getDaysOfWeek(): string[] {
   return daysOfWeek;
 }
 
-export function getDayOfWeekNumericalValue(dayOfWeekName: string): number {
+function getDayOfWeekNumericalValue(dayOfWeekName: string): number {
   return getDaysOfWeek().indexOf(dayOfWeekName.toLowerCase());
 }
 
@@ -297,13 +297,6 @@ export function join(...partSegments: string[]): string {
   if (parts[0] === "") newParts.unshift("");
   // Turn back into a single string path.
   return newParts.join("/");
-}
-
-export function basename(fullPath: string): string {
-  let base = fullPath.substring(fullPath.lastIndexOf("/") + 1);
-  if (base.lastIndexOf(".") !== -1)
-    base = base.substring(0, base.lastIndexOf("."));
-  return base;
 }
 
 async function ensureFolderExists(app: App, path: string): Promise<void> {
