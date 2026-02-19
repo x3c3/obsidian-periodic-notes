@@ -8,8 +8,11 @@ import {
 } from "obsidian";
 
 import type { PeriodicNoteCachedMetadata } from "./cache";
-import { DEFAULT_FORMAT, HUMANIZE_FORMAT } from "./constants";
-import { DEFAULT_PERIODIC_CONFIG } from "./settings";
+import {
+  DEFAULT_FORMAT,
+  DEFAULT_PERIODIC_CONFIG,
+  HUMANIZE_FORMAT,
+} from "./constants";
 import { removeEscapedCharacters } from "./settings/validation";
 import type { CalendarSet, Granularity, PeriodicConfig } from "./types";
 

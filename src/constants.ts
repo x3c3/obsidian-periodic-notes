@@ -14,6 +14,14 @@ export const DEFAULT_FORMAT = Object.freeze({
 
 export const DEFAULT_CALENDARSET_ID = "Default";
 
+export const DEFAULT_PERIODIC_CONFIG = Object.freeze({
+  enabled: false,
+  openAtStartup: false,
+  format: "",
+  templatePath: "",
+  folder: "",
+});
+
 export const HUMANIZE_FORMAT = Object.freeze({
   month: "MMMM YYYY",
   quarter: "YYYY Q[Q]",

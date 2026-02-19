@@ -9,7 +9,7 @@ import CalendarSetManager, {
   migrateLegacySettingsToCalendarSet,
 } from "./calendarSetManager";
 import { displayConfigs, getCommands } from "./commands";
-import { DEFAULT_CALENDARSET_ID } from "./constants";
+import { DEFAULT_CALENDARSET_ID, DEFAULT_PERIODIC_CONFIG } from "./constants";
 import {
   calendarDayIcon,
   calendarMonthIcon,
@@ -19,7 +19,6 @@ import {
 } from "./icons";
 import { showFileMenu } from "./modal";
 import {
-  DEFAULT_PERIODIC_CONFIG,
   DEFAULT_SETTINGS,
   PeriodicNotesSettingsTab,
   type Settings,

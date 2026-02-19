@@ -1,5 +1,6 @@
 import cloneDeep from "lodash/cloneDeep";
 import type { App, DailyNotesPlugin } from "obsidian";
+import { DEFAULT_PERIODIC_CONFIG } from "src/constants";
 import {
   type CalendarSet,
   type Granularity,
@@ -7,8 +8,7 @@ import {
   type PeriodicConfig,
 } from "src/types";
 import { get, type Updater, type Writable } from "svelte/store";
-
-import { DEFAULT_PERIODIC_CONFIG, type Settings } from ".";
+import type { Settings } from ".";
 
 const defaultPeriodicSettings = granularities.reduce(
   (acc, g) => {

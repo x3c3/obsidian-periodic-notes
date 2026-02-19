@@ -9,7 +9,7 @@
   import NoteFolderSetting from "src/settings/components/NoteFolderSetting.svelte";
   import type { Granularity } from "src/types";
   import Arrow from "src/settings/components/Arrow.svelte";
-  import { DEFAULT_PERIODIC_CONFIG } from "src/settings";
+  import { DEFAULT_PERIODIC_CONFIG } from "src/constants";
   import type { Settings } from "src/settings";
   import type { Writable } from "svelte/store";
   import writableDerived from "svelte-writable-derived";

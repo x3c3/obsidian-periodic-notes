@@ -1,6 +1,6 @@
 import { type App, PluginSettingTab } from "obsidian";
 import { DEFAULT_CALENDARSET_ID } from "src/constants";
-import type { CalendarSet, PeriodicConfig } from "src/types";
+import type { CalendarSet } from "src/types";
 import { mount, unmount } from "svelte";
 
 import type PeriodicNotesPlugin from "../main";
@@ -32,15 +32,6 @@ export const DEFAULT_SETTINGS: Settings = {
 
   // Localization
 };
-
-export const DEFAULT_PERIODIC_CONFIG: PeriodicConfig = Object.freeze({
-  enabled: false,
-  openAtStartup: false,
-
-  format: "",
-  templatePath: "",
-  folder: "",
-});
 
 export class PeriodicNotesSettingsTab extends PluginSettingTab {
   private view!: Record<string, never>;
