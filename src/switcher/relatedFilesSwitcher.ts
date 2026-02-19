@@ -3,6 +3,7 @@ import { DEFAULT_FORMAT } from "src/constants";
 import type PeriodicNotesPlugin from "src/main";
 
 import type { DateNavigationItem } from "../types";
+import { NLDNavigator } from "./switcher";
 
 const DEFAULT_INSTRUCTIONS = [
   { command: "*", purpose: "show all notes within this period" },
@@ -38,10 +39,9 @@ export class RelatedFilesSwitcher extends SuggestModal<DateNavigationItem> {
       }),
     );
 
-    this.scope.register([], "Tab", async (evt: KeyboardEvent) => {
+    this.scope.register([], "Tab", (evt: KeyboardEvent) => {
       evt.preventDefault();
       this.close();
-      const { NLDNavigator } = await import("./switcher");
       const nav = new NLDNavigator(this.app, this.plugin);
       nav.open();
 
