@@ -2,7 +2,9 @@
   "extends": "@tsconfig/svelte/tsconfig.json",
   "include": ["src/**/*", "version-bump.ts"],
   "compilerOptions": {
-    "lib": ["ES2022", "DOM"],
+    "target": "ESNext",
+    "lib": ["DOM", "ESNext"],
+    "module": "ESNext",
     "types": ["svelte", "node"],
     "noEmit": true,
     "baseUrl": ".",
