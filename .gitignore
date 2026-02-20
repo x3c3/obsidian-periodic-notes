@@ -24,8 +24,8 @@ Thumbs.db
 *.swo
 *~
 
-# Obsidian
-data.json
-
 # Claude Code
 .claude/settings.local.json
+
+# Planning
+.planning/

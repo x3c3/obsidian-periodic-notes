@@ -34,7 +34,7 @@ export const DEFAULT_SETTINGS: Settings = {
 };
 
 export class PeriodicNotesSettingsTab extends PluginSettingTab {
-  private view!: Record<string, never>;
+  private view!: Record<string, unknown>;
 
   constructor(
     readonly app: App,
