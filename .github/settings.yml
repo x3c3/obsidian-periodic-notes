@@ -1,0 +1,9 @@
+_extends: .github
+
+repository:
+  name: obsidian-periodic-notes
+  description: "Create and manage daily, weekly, monthly, quarterly, and yearly notes in Obsidian"
+  homepage: https://philoserf.github.io/obsidian-periodic-notes/
+  topics:
+    - obsidian-plugin
+    - periodic-notes

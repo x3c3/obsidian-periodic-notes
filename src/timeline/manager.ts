@@ -6,7 +6,7 @@ import { mount, unmount } from "svelte";
 import Timeline from "./Timeline.svelte";
 
 interface MountedTimeline {
-  component: Record<string, never>;
+  component: Record<string, unknown>;
   target: HTMLElement;
 }
 
