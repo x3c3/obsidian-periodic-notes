@@ -12,8 +12,6 @@ export const DEFAULT_FORMAT = Object.freeze({
   year: DEFAULT_YEARLY_NOTE_FORMAT,
 });
 
-export const DEFAULT_CALENDARSET_ID = "Default";
-
 export const DEFAULT_PERIODIC_CONFIG = Object.freeze({
   enabled: false,
   openAtStartup: false,
