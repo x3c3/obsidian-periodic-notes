@@ -27,7 +27,7 @@
   // svelte-ignore state_referenced_locally
   let config = writableDerived(
     settings,
-    ($settings) => $settings[granularity] ?? DEFAULT_PERIODIC_CONFIG,
+    ($settings) => $settings[granularity] ?? { ...DEFAULT_PERIODIC_CONFIG },
     (reflecting, $settings) => {
       $settings[granularity] = reflecting;
       return $settings;
