@@ -14,7 +14,8 @@ import {
   HUMANIZE_FORMAT,
 } from "./constants";
 import { removeEscapedCharacters } from "./settings/validation";
-import type { CalendarSet, Granularity, PeriodicConfig } from "./types";
+import type { Settings } from "./settings";
+import type { Granularity, PeriodicConfig } from "./types";
 
 export function isMetaPressed(e: MouseEvent | KeyboardEvent): boolean {
   return Platform.isMacOS ? e.metaKey : e.ctrlKey;
@@ -177,10 +178,10 @@ export function applyTemplateTransformations(
 }
 
 export function getFormat(
-  calendarSet: CalendarSet,
+  settings: Settings,
   granularity: Granularity,
 ): string {
-  return calendarSet[granularity]?.format || DEFAULT_FORMAT[granularity];
+  return settings[granularity]?.format || DEFAULT_FORMAT[granularity];
 }
 
 /**
@@ -189,10 +190,10 @@ export function getFormat(
  * users move the file later.
  */
 export function getPossibleFormats(
-  calendarSet: CalendarSet,
+  settings: Settings,
   granularity: Granularity,
 ): string[] {
-  const format = calendarSet[granularity]?.format;
+  const format = settings[granularity]?.format;
   if (!format) return [DEFAULT_FORMAT[granularity]];
 
   const partialFormatExp = /[^/]*$/.exec(format);
@@ -204,29 +205,29 @@ export function getPossibleFormats(
 }
 
 export function getFolder(
-  calendarSet: CalendarSet,
+  settings: Settings,
   granularity: Granularity,
 ): string {
-  return calendarSet[granularity]?.folder || "/";
+  return settings[granularity]?.folder || "/";
 }
 
 export function getConfig(
-  calendarSet: CalendarSet,
+  settings: Settings,
   granularity: Granularity,
 ): PeriodicConfig {
-  return calendarSet[granularity] ?? DEFAULT_PERIODIC_CONFIG;
+  return settings[granularity] ?? DEFAULT_PERIODIC_CONFIG;
 }
 
 export async function applyPeriodicTemplateToFile(
   app: App,
   file: TFile,
-  calendarSet: CalendarSet,
+  settings: Settings,
   metadata: PeriodicNoteCachedMetadata,
 ) {
-  const format = getFormat(calendarSet, metadata.granularity);
+  const format = getFormat(settings, metadata.granularity);
   const templateContents = await getTemplateContents(
     app,
-    calendarSet[metadata.granularity]?.templatePath,
+    settings[metadata.granularity]?.templatePath,
   );
   const renderedContents = applyTemplateTransformations(
     file.basename,
