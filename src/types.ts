@@ -1,16 +1,11 @@
-export type Granularity =
-  | "day"
-  | "week"
-  | "month"
-  | "quarter"
-  | "year"; /*| "fiscal-year" */
+export type Granularity = "day" | "week" | "month" | "quarter" | "year";
 
 export const granularities: Granularity[] = [
   "day",
   "week",
   "month",
   "quarter",
-  "year" /*", fiscal-year" */,
+  "year",
 ];
 
 export interface PeriodicConfig {
@@ -30,16 +25,4 @@ export interface DateNavigationItem {
     exact: boolean;
     matchType: import("./cache").MatchType;
   };
-}
-
-export interface CalendarSet {
-  id: string;
-  ctime: string;
-
-  day?: PeriodicConfig;
-  week?: PeriodicConfig;
-  month?: PeriodicConfig;
-  quarter?: PeriodicConfig;
-  year?: PeriodicConfig;
-  fiscalYear?: PeriodicConfig;
 }
