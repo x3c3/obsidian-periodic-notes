@@ -1,4 +1,5 @@
 import { type App, type Command, Notice, TFile } from "obsidian";
+import { get } from "svelte/store";
 import type PeriodicNotesPlugin from "./main";
 
 import type { Granularity } from "./types";
@@ -47,11 +48,7 @@ async function jumpToAdjacentNote(
   const activeFileMeta = plugin.findInCache(activeFile.path);
   if (!activeFileMeta) return;
 
-  const adjacentNoteMeta = plugin.findAdjacent(
-    activeFileMeta.calendarSet,
-    activeFile.path,
-    direction,
-  );
+  const adjacentNoteMeta = plugin.findAdjacent(activeFile.path, direction);
 
   if (adjacentNoteMeta) {
     const file = app.vault.getAbstractFileByPath(adjacentNoteMeta.filePath);
@@ -91,9 +88,8 @@ function isGranularityActive(
   plugin: PeriodicNotesPlugin,
   granularity: Granularity,
 ): boolean {
-  return plugin.calendarSetManager
-    .getActiveGranularities()
-    .includes(granularity);
+  const settings = get(plugin.settings);
+  return settings[granularity]?.enabled === true;
 }
 
 export function getCommands(
