@@ -1,6 +1,7 @@
 import type { Moment } from "moment";
 import { type App, type NLDatesPlugin, SuggestModal, setIcon } from "obsidian";
 import type PeriodicNotesPlugin from "src/main";
+import { getEnabledGranularities } from "src/settings/utils";
 import {
   getFolder,
   getFormat,
@@ -9,6 +10,7 @@ import {
   isMetaPressed,
   join,
 } from "src/utils";
+import { get } from "svelte/store";
 
 import type { DateNavigationItem, Granularity } from "../types";
 import { RelatedFilesSwitcher } from "./relatedFilesSwitcher";
@@ -69,7 +71,7 @@ export class NLDNavigator extends SuggestModal<DateNavigationItem> {
 
     let label = "";
     if (granularity === "week") {
-      const format = this.plugin.calendarSetManager.getFormat("week");
+      const format = getFormat(get(this.plugin.settings), "week");
       const weekNumber = isIsoFormat(format) ? "WW" : "ww";
       label = date.format(`GGGG [Week] ${weekNumber}`);
     } else if (granularity === "day") {
@@ -112,8 +114,9 @@ export class NLDNavigator extends SuggestModal<DateNavigationItem> {
   }
 
   getDateSuggestions(query: string): DateNavigationItem[] {
-    const activeGranularities =
-      this.plugin.calendarSetManager.getActiveGranularities();
+    const activeGranularities = getEnabledGranularities(
+      get(this.plugin.settings),
+    );
     const getSuggestion = (dateStr: string, granularity: Granularity) => {
       const date = this.nlDatesPlugin.parseDate(dateStr);
       return {
@@ -198,9 +201,9 @@ export class NLDNavigator extends SuggestModal<DateNavigationItem> {
     );
 
     if (!periodicNote) {
-      const calendarSet = this.plugin.calendarSetManager.getActiveSet();
-      const format = getFormat(calendarSet, value.granularity);
-      const folder = getFolder(calendarSet, value.granularity);
+      const settings = get(this.plugin.settings);
+      const format = getFormat(settings, value.granularity);
+      const folder = getFolder(settings, value.granularity);
       el.setText(value.label);
       el.createEl("span", { cls: "suggestion-flair", prepend: true }, (el) => {
         setIcon(el, "file-plus");
