@@ -17,10 +17,6 @@ declare module "obsidian" {
     ): EventRef;
   }
 
-  interface CommandManager {
-    removeCommand(commandName: string): void;
-  }
-
   interface VaultSettings {
     localeOverride: LocaleOverride;
     weekStart: WeekStartOption;
@@ -49,7 +45,6 @@ declare module "obsidian" {
   }
 
   export interface App {
-    commands: CommandManager;
     internalPlugins: InternalPlugins;
     plugins: CommunityPluginManager;
   }

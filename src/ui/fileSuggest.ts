@@ -1,24 +1,11 @@
-import { type TAbstractFile, TFile, TFolder } from "obsidian";
+import { AbstractInputSuggest, type TFile, type TFolder } from "obsidian";
 
-import { TextInputSuggest } from "./suggest";
-
-export class FileSuggest extends TextInputSuggest<TFile> {
-  getSuggestions(inputStr: string): TFile[] {
-    const abstractFiles = this.app.vault.getAllLoadedFiles();
-    const files: TFile[] = [];
-    const lowerCaseInputStr = inputStr.toLowerCase();
-
-    abstractFiles.forEach((file: TAbstractFile) => {
-      if (
-        file instanceof TFile &&
-        file.extension === "md" &&
-        file.path.toLowerCase().contains(lowerCaseInputStr)
-      ) {
-        files.push(file);
-      }
-    });
-
-    return files;
+export class FileSuggest extends AbstractInputSuggest<TFile> {
+  getSuggestions(query: string): TFile[] {
+    const lowerQuery = query.toLowerCase();
+    return this.app.vault
+      .getMarkdownFiles()
+      .filter((file) => file.path.toLowerCase().contains(lowerQuery));
   }
 
   renderSuggestion(file: TFile, el: HTMLElement): void {
@@ -26,37 +13,25 @@ export class FileSuggest extends TextInputSuggest<TFile> {
   }
 
   selectSuggestion(file: TFile): void {
-    this.inputEl.value = file.path;
-    this.inputEl.trigger("input");
+    this.setValue(file.path);
     this.close();
   }
 }
 
-export class FolderSuggest extends TextInputSuggest<TFolder> {
-  getSuggestions(inputStr: string): TFolder[] {
-    const abstractFiles = this.app.vault.getAllLoadedFiles();
-    const folders: TFolder[] = [];
-    const lowerCaseInputStr = inputStr.toLowerCase();
-
-    abstractFiles.forEach((folder: TAbstractFile) => {
-      if (
-        folder instanceof TFolder &&
-        folder.path.toLowerCase().contains(lowerCaseInputStr)
-      ) {
-        folders.push(folder);
-      }
-    });
-
-    return folders;
+export class FolderSuggest extends AbstractInputSuggest<TFolder> {
+  getSuggestions(query: string): TFolder[] {
+    const lowerQuery = query.toLowerCase();
+    return this.app.vault
+      .getAllFolders()
+      .filter((folder) => folder.path.toLowerCase().contains(lowerQuery));
   }
 
-  renderSuggestion(file: TFolder, el: HTMLElement): void {
-    el.setText(file.path);
+  renderSuggestion(folder: TFolder, el: HTMLElement): void {
+    el.setText(folder.path);
   }
 
-  selectSuggestion(file: TFolder): void {
-    this.inputEl.value = file.path;
-    this.inputEl.trigger("input");
+  selectSuggestion(folder: TFolder): void {
+    this.setValue(folder.path);
     this.close();
   }
 }

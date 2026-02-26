@@ -106,10 +106,6 @@ export const findStartupNoteConfig: FindStartupNoteConfigFunc = (
   return null;
 };
 
-export const wrapAround = (value: number, size: number): number => {
-  return ((value % size) + size) % size;
-};
-
 export function isDailyNotesPluginEnabled(app: App): boolean {
   // private API: app.internalPlugins is undocumented
   return app.internalPlugins.getPluginById("daily-notes").enabled;
