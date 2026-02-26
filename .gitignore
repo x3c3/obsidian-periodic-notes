@@ -26,6 +26,7 @@ Thumbs.db
 
 # Claude Code
 .claude/settings.local.json
+.worktrees/
 
 # Planning
 .planning/
