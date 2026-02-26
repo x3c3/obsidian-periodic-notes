@@ -118,13 +118,6 @@ export default class CalendarSetManager {
     return get(this.plugin.settings).calendarSets;
   }
 
-  public getInactiveGranularities(): Granularity[] {
-    const activeSet = this.getActiveSet();
-    return granularities.filter(
-      (granularity) => !activeSet[granularity]?.enabled,
-    );
-  }
-
   public getActiveGranularities(): Granularity[] {
     const activeSet = this.getActiveSet();
     return granularities.filter(

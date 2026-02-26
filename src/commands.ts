@@ -87,6 +87,15 @@ async function openAdjacentNote(
   plugin.openPeriodicNote(activeFileMeta.granularity, adjacentDate);
 }
 
+function isGranularityActive(
+  plugin: PeriodicNotesPlugin,
+  granularity: Granularity,
+): boolean {
+  return plugin.calendarSetManager
+    .getActiveGranularities()
+    .includes(granularity);
+}
+
 export function getCommands(
   app: App,
   plugin: PeriodicNotesPlugin,
@@ -98,13 +107,20 @@ export function getCommands(
     {
       id: `open-${config.periodicity}-note`,
       name: config.labelOpenPresent,
-      callback: () => plugin.openPeriodicNote(granularity, window.moment()),
+      checkCallback: (checking: boolean) => {
+        if (!isGranularityActive(plugin, granularity)) return false;
+        if (checking) {
+          return true;
+        }
+        plugin.openPeriodicNote(granularity, window.moment());
+      },
     },
 
     {
       id: `next-${config.periodicity}-note`,
       name: `Jump forwards to closest ${config.periodicity} note`,
       checkCallback: (checking: boolean) => {
+        if (!isGranularityActive(plugin, granularity)) return false;
         const activeFile = app.workspace.getActiveFile();
         if (checking) {
           if (!activeFile) return false;
@@ -117,6 +133,7 @@ export function getCommands(
       id: `prev-${config.periodicity}-note`,
       name: `Jump backwards to closest ${config.periodicity} note`,
       checkCallback: (checking: boolean) => {
+        if (!isGranularityActive(plugin, granularity)) return false;
         const activeFile = app.workspace.getActiveFile();
         if (checking) {
           if (!activeFile) return false;
@@ -129,6 +146,7 @@ export function getCommands(
       id: `open-next-${config.periodicity}-note`,
       name: `Open next ${config.periodicity} note`,
       checkCallback: (checking: boolean) => {
+        if (!isGranularityActive(plugin, granularity)) return false;
         const activeFile = app.workspace.getActiveFile();
         if (checking) {
           if (!activeFile) return false;
@@ -141,6 +159,7 @@ export function getCommands(
       id: `open-prev-${config.periodicity}-note`,
       name: `Open previous ${config.periodicity} note`,
       checkCallback: (checking: boolean) => {
+        if (!isGranularityActive(plugin, granularity)) return false;
         const activeFile = app.workspace.getActiveFile();
         if (checking) {
           if (!activeFile) return false;
