@@ -82,7 +82,7 @@ export class PeriodicNotesCache extends Component {
   }
 
   public reset(): void {
-    console.info("[Periodic Notes] reseting cache");
+    console.info("[Periodic Notes] resetting cache");
     this.cachedFiles.clear();
     this.initialize();
   }
