@@ -1,6 +1,8 @@
 import { type App, Menu, type Point } from "obsidian";
+import { get } from "svelte/store";
 import { displayConfigs } from "./commands";
 import type PeriodicNotesPlugin from "./main";
+import { getEnabledGranularities } from "./settings/utils";
 
 export function showFileMenu(
   _app: App,
@@ -9,7 +11,7 @@ export function showFileMenu(
 ): void {
   const contextMenu = new Menu();
 
-  plugin.calendarSetManager.getActiveGranularities().forEach((granularity) => {
+  getEnabledGranularities(get(plugin.settings)).forEach((granularity) => {
     const config = displayConfigs[granularity];
     contextMenu.addItem((item) =>
       item
