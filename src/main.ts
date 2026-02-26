@@ -1,6 +1,6 @@
 import type { Moment } from "moment";
 import { addIcon, Plugin, type TFile } from "obsidian";
-import { type Writable, writable, get } from "svelte/store";
+import { get, type Writable, writable } from "svelte/store";
 
 import { type PeriodicNoteCachedMetadata, PeriodicNotesCache } from "./cache";
 import { displayConfigs, getCommands } from "./commands";

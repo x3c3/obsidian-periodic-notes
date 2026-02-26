@@ -13,8 +13,8 @@ import {
   DEFAULT_PERIODIC_CONFIG,
   HUMANIZE_FORMAT,
 } from "./constants";
-import { removeEscapedCharacters } from "./settings/validation";
 import type { Settings } from "./settings";
+import { removeEscapedCharacters } from "./settings/validation";
 import type { Granularity, PeriodicConfig } from "./types";
 
 export function isMetaPressed(e: MouseEvent | KeyboardEvent): boolean {
