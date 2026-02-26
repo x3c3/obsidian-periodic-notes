@@ -97,7 +97,7 @@
       onChange={(e) => {
         const val = (e.target as HTMLSelectElement).value;
         localization.localeOverride = val;
-        app.vault.setConfig("weekStart", val);
+        app.vault.setConfig("localeOverride", val);
       }}
     />
   {/snippet}

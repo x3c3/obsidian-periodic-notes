@@ -1,4 +1,4 @@
-import type { DailyNotesSettings } from "obsidian";
+import type { App, DailyNotesPlugin } from "obsidian";
 
 import type { Settings } from "./settings";
 import type { PeriodicConfig } from "./types";
@@ -11,10 +11,6 @@ interface PeriodicitySettings {
 }
 
 interface LegacySettings {
-  showGettingStartedBanner: boolean;
-  hasMigratedDailyNoteSettings: boolean;
-  hasMigratedWeeklyNoteSettings: boolean;
-
   daily: PeriodicitySettings;
   weekly: PeriodicitySettings;
   monthly: PeriodicitySettings;
@@ -29,19 +25,18 @@ export function isLegacySettings(
   return !!(s.daily || s.weekly || s.monthly || s.yearly || s.quarterly);
 }
 
-export function migrateDailyNoteSettings(
-  settings: LegacySettings,
-): Partial<Settings> {
-  const migrateConfig = (s: DailyNotesSettings): PeriodicConfig => ({
-    enabled: true,
-    format: s.format || "",
-    folder: s.folder || "",
-    openAtStartup: s.autorun ?? false,
-    templatePath: s.template,
-  });
+export function migrateDailyNoteSettings(app: App): Partial<Settings> {
+  const plugin = app.internalPlugins.getPluginById("daily-notes");
+  const options = (plugin?.instance as DailyNotesPlugin)?.options || {};
 
   return {
-    day: migrateConfig(settings.daily),
+    day: {
+      enabled: true,
+      format: options.format || "",
+      folder: options.folder || "",
+      openAtStartup: options.autorun ?? false,
+      templatePath: options.template,
+    },
   };
 }
 

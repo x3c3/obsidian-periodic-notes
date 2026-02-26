@@ -16,7 +16,7 @@ export const DEFAULT_PERIODIC_CONFIG = Object.freeze({
   enabled: false,
   openAtStartup: false,
   format: "",
-  templatePath: "",
+  templatePath: undefined,
   folder: "",
 });
 

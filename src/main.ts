@@ -155,7 +155,7 @@ export default class PeriodicNotesPlugin extends Plugin {
       !settings.year
     ) {
       if (hasLegacyDailyNoteSettings(this.app)) {
-        const migrated = migrateDailyNoteSettings(settings);
+        const migrated = migrateDailyNoteSettings(this.app);
         Object.assign(settings, migrated);
       } else {
         // Create default day config
