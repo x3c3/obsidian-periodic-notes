@@ -15,9 +15,8 @@
   import writableDerived from "svelte-writable-derived";
   import OpenAtStartupSetting from "src/settings/components/OpenAtStartupSetting.svelte";
 
-  let { app, calendarSetId, granularity, settings }: {
+  let { app, granularity, settings }: {
     app: App;
-    calendarSetId: string;
     granularity: Granularity;
     settings: Writable<Settings>;
   } = $props();
@@ -25,25 +24,12 @@
   let displayConfig = $derived(displayConfigs[granularity]);
   let isExpanded = $state(false);
 
-  // svelte-ignore state_referenced_locally
-  let calendarSet = writableDerived(
-    settings,
-    ($settings) =>
-      $settings.calendarSets.find((set) => set.id === calendarSetId)!,
-    (reflecting, $settings) => {
-      const idx = $settings.calendarSets.findIndex(
-        (set) => set.id === calendarSetId,
-      );
-      $settings.calendarSets[idx] = reflecting;
-      return $settings;
-    },
-  );
   let config = writableDerived(
-    calendarSet,
-    ($calendarSet) => $calendarSet?.[granularity] ?? DEFAULT_PERIODIC_CONFIG,
-    (reflecting, $calendarSet) => {
-      $calendarSet[granularity] = reflecting;
-      return $calendarSet;
+    settings,
+    ($settings) => $settings[granularity] ?? DEFAULT_PERIODIC_CONFIG,
+    (reflecting, $settings) => {
+      $settings[granularity] = reflecting;
+      return $settings;
     },
   );
 

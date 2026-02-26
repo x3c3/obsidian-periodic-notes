@@ -3,6 +3,7 @@ import type { Granularity, PeriodicConfig } from "src/types";
 import { mount, unmount } from "svelte";
 
 import type PeriodicNotesPlugin from "../main";
+import SettingsPage from "./pages/SettingsPage.svelte";
 
 export interface Settings {
   showGettingStartedBanner: boolean;
@@ -39,8 +40,14 @@ export class PeriodicNotesSettingsTab extends PluginSettingTab {
 
   display(): void {
     this.containerEl.empty();
-    // SettingsPage.svelte will be created in Task 7
-    // For now this will cause a build error — that's expected
+
+    this.view = mount(SettingsPage, {
+      target: this.containerEl,
+      props: {
+        app: this.app,
+        settings: this.plugin.settings,
+      },
+    });
   }
 
   hide() {
