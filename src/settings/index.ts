@@ -1,36 +1,29 @@
 import { type App, PluginSettingTab } from "obsidian";
-import { DEFAULT_CALENDARSET_ID } from "src/constants";
-import type { CalendarSet } from "src/types";
+import type { Granularity, PeriodicConfig } from "src/types";
 import { mount, unmount } from "svelte";
 
 import type PeriodicNotesPlugin from "../main";
-import SettingsRouter from "./pages/Router.svelte";
 
 export interface Settings {
   showGettingStartedBanner: boolean;
   hasMigratedDailyNoteSettings: boolean;
   hasMigratedWeeklyNoteSettings: boolean;
   installedVersion: string;
-
-  activeCalendarSet: string;
-  calendarSets: CalendarSet[];
-
   enableTimelineComplication: boolean;
+
+  day?: PeriodicConfig;
+  week?: PeriodicConfig;
+  month?: PeriodicConfig;
+  quarter?: PeriodicConfig;
+  year?: PeriodicConfig;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
-  // Onboarding
   installedVersion: "1.0.0-beta3",
   showGettingStartedBanner: true,
   hasMigratedDailyNoteSettings: false,
   hasMigratedWeeklyNoteSettings: false,
-
-  // Configuration / Preferences
-  activeCalendarSet: DEFAULT_CALENDARSET_ID,
-  calendarSets: [],
   enableTimelineComplication: true,
-
-  // Localization
 };
 
 export class PeriodicNotesSettingsTab extends PluginSettingTab {
@@ -46,19 +39,14 @@ export class PeriodicNotesSettingsTab extends PluginSettingTab {
 
   display(): void {
     this.containerEl.empty();
-
-    this.view = mount(SettingsRouter, {
-      target: this.containerEl,
-      props: {
-        app: this.app,
-        manager: this.plugin.calendarSetManager,
-        settings: this.plugin.settings,
-      },
-    });
+    // SettingsPage.svelte will be created in Task 7
+    // For now this will cause a build error — that's expected
   }
 
   hide() {
     super.hide();
-    unmount(this.view);
+    if (this.view) {
+      unmount(this.view);
+    }
   }
 }
