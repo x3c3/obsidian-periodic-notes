@@ -7,8 +7,6 @@ import SettingsPage from "./pages/SettingsPage.svelte";
 
 export interface Settings {
   showGettingStartedBanner: boolean;
-  hasMigratedDailyNoteSettings: boolean;
-  hasMigratedWeeklyNoteSettings: boolean;
   installedVersion: string;
   enableTimelineComplication: boolean;
 
@@ -22,8 +20,6 @@ export interface Settings {
 export const DEFAULT_SETTINGS: Settings = {
   installedVersion: "1.0.0-beta3",
   showGettingStartedBanner: true,
-  hasMigratedDailyNoteSettings: false,
-  hasMigratedWeeklyNoteSettings: false,
   enableTimelineComplication: true,
 };
 

@@ -12,11 +12,6 @@ import {
   calendarWeekIcon,
   calendarYearIcon,
 } from "./icons";
-import {
-  isLegacySettings,
-  migrateDailyNoteSettings,
-  migrateLegacySettings,
-} from "./migration";
 import { showFileMenu } from "./modal";
 import {
   DEFAULT_SETTINGS,
@@ -27,7 +22,6 @@ import { initializeLocaleConfigOnce } from "./settings/localization";
 import {
   findStartupNoteConfig,
   getEnabledGranularities,
-  hasLegacyDailyNoteSettings,
 } from "./settings/utils";
 import { NLDNavigator } from "./switcher/switcher";
 import TimelineManager from "./timeline/manager";
@@ -143,27 +137,14 @@ export default class PeriodicNotesPlugin extends Plugin {
     const savedSettings = await this.loadData();
     const settings = Object.assign({}, DEFAULT_SETTINGS, savedSettings || {});
 
-    // Check if settings need migration
-    if (isLegacySettings(settings)) {
-      const migrated = migrateLegacySettings(settings);
-      Object.assign(settings, migrated);
-    } else if (
+    if (
       !settings.day &&
       !settings.week &&
       !settings.month &&
       !settings.quarter &&
       !settings.year
     ) {
-      if (hasLegacyDailyNoteSettings(this.app)) {
-        const migrated = migrateDailyNoteSettings(this.app);
-        Object.assign(settings, migrated);
-      } else {
-        // Create default day config
-        settings.day = {
-          ...DEFAULT_PERIODIC_CONFIG,
-          enabled: true,
-        };
-      }
+      settings.day = { ...DEFAULT_PERIODIC_CONFIG, enabled: true };
     }
 
     this.settings.set(settings);
