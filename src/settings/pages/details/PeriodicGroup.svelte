@@ -24,6 +24,7 @@
   let displayConfig = $derived(displayConfigs[granularity]);
   let isExpanded = $state(false);
 
+  // svelte-ignore state_referenced_locally
   let config = writableDerived(
     settings,
     ($settings) => $settings[granularity] ?? DEFAULT_PERIODIC_CONFIG,

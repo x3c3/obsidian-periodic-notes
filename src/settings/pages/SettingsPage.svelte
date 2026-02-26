@@ -25,6 +25,7 @@
     settings: Writable<Settings>;
   } = $props();
 
+  // svelte-ignore state_referenced_locally
   let localization = $state(getLocalizationSettings(app));
 </script>
 
