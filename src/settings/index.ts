@@ -1,5 +1,5 @@
 import { type App, PluginSettingTab } from "obsidian";
-import type { Granularity, PeriodicConfig } from "src/types";
+import type { PeriodicConfig } from "src/types";
 import { mount, unmount } from "svelte";
 
 import type PeriodicNotesPlugin from "../main";

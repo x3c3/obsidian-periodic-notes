@@ -36,7 +36,7 @@ export function migrateDailyNoteSettings(
     enabled: true,
     format: s.format || "",
     folder: s.folder || "",
-    openAtStartup: s.autorun,
+    openAtStartup: s.autorun ?? false,
     templatePath: s.template,
   });
 
