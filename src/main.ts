@@ -33,7 +33,7 @@ import {
 import { CalendarSetSuggestModal } from "./switcher/calendarSetSwitcher";
 import { NLDNavigator } from "./switcher/switcher";
 import TimelineManager from "./timeline/manager";
-import type { Granularity } from "./types";
+import { type Granularity, granularities } from "./types";
 import {
   applyTemplateTransformations,
   getNoteCreationPath,
@@ -147,24 +147,11 @@ export default class PeriodicNotesPlugin extends Plugin {
   }
 
   private configureCommands() {
-    // Remove disabled commands
-    this.calendarSetManager
-      .getInactiveGranularities()
-      .forEach((granularity: Granularity) => {
-        getCommands(this.app, this, granularity).forEach((command) => {
-          // private API: CommandManager.removeCommand is undocumented
-          this.app.commands.removeCommand(`periodic-notes:${command.id}`);
-        });
-      });
-
-    // register enabled commands
-    this.calendarSetManager
-      .getActiveGranularities()
-      .forEach((granularity: Granularity) => {
-        getCommands(this.app, this, granularity).forEach(
-          this.addCommand.bind(this),
-        );
-      });
+    for (const granularity of granularities) {
+      getCommands(this.app, this, granularity).forEach(
+        this.addCommand.bind(this),
+      );
+    }
   }
 
   async loadSettings(): Promise<void> {
@@ -205,10 +192,7 @@ export default class PeriodicNotesPlugin extends Plugin {
 
   private async onUpdateSettings(newSettings: Settings): Promise<void> {
     await this.saveData(newSettings);
-    this.configureCommands();
     this.configureRibbonIcons();
-
-    // Integrations (i.e. Calendar Plugin) can listen for changes to settings
     this.app.workspace.trigger("periodic-notes:settings-updated");
   }
 
