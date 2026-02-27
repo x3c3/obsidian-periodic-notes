@@ -16,6 +16,7 @@
     "format": "biome format --write .",
     "format:check": "biome format .",
     "validate": "bun run scripts/validate-plugin.ts",
+    "deploy": "cp dist/main.js manifest.json styles.css ~/source/mine/notes/.obsidian/plugins/periodic-notes/",
     "test": "bun test",
     "version": "bun run version-bump.ts"
   },
