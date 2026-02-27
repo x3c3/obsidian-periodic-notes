@@ -24,7 +24,6 @@ import {
   getEnabledGranularities,
 } from "./settings/utils";
 import { NLDNavigator } from "./switcher/switcher";
-import TimelineManager from "./timeline/manager";
 import { type Granularity, granularities } from "./types";
 import {
   applyTemplateTransformations,
@@ -44,12 +43,6 @@ export default class PeriodicNotesPlugin extends Plugin {
   private ribbonEl!: HTMLElement | null;
 
   private cache!: PeriodicNotesCache;
-  private timelineManager!: TimelineManager;
-
-  unload(): void {
-    super.unload();
-    this.timelineManager?.cleanup();
-  }
 
   async onload(): Promise<void> {
     addIcon("calendar-day", calendarDayIcon);
@@ -66,7 +59,6 @@ export default class PeriodicNotesPlugin extends Plugin {
 
     this.ribbonEl = null;
     this.cache = new PeriodicNotesCache(this.app, this);
-    this.timelineManager = new TimelineManager(this, this.cache);
 
     this.openPeriodicNote = this.openPeriodicNote.bind(this);
     this.addSettingTab(new PeriodicNotesSettingsTab(this.app, this));
