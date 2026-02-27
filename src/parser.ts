@@ -7,17 +7,13 @@ interface ParseData {
   date: Moment;
 }
 
-// TODO rename these to remove 'prefix'
-const FULL_DATE_PREFIX =
+const FULL_DATE_PATTERN =
   /(\d{4})[-.]?(0[1-9]|1[0-2])[-.]?(0[1-9]|[12][0-9]|3[01])/;
-const MONTH_PREFIX = /(\d{4})[-.]?(0[1-9]|1[0-2])/;
-// const WEEK_PREFIX = /(\d{4})[-. ]?W(\d{2})/;
-const YEAR_PREFIX = /(\d{4})/;
+const MONTH_PATTERN = /(\d{4})[-.]?(0[1-9]|1[0-2])/;
+const YEAR_PATTERN = /(\d{4})/;
 
 export function getLooselyMatchedDate(inputStr: string): ParseData | null {
-  // TODO: include 'unparsed characters' in match data
-  // to show what _isn't_ a date/timestamp
-  const fullDateExp = FULL_DATE_PREFIX.exec(inputStr);
+  const fullDateExp = FULL_DATE_PATTERN.exec(inputStr);
   if (fullDateExp) {
     return {
       date: window.moment({
@@ -29,7 +25,7 @@ export function getLooselyMatchedDate(inputStr: string): ParseData | null {
     };
   }
 
-  const monthDateExp = MONTH_PREFIX.exec(inputStr);
+  const monthDateExp = MONTH_PATTERN.exec(inputStr);
   if (monthDateExp) {
     return {
       date: window.moment({
@@ -41,21 +37,7 @@ export function getLooselyMatchedDate(inputStr: string): ParseData | null {
     };
   }
 
-  // TODO: This should probably _always_ be ISO, but that could cause issues for
-  // users not using ISO.
-
-  // const weekDateExp = WEEK_PREFIX.exec(inputStr);
-  // if (weekDateExp) {
-  //   return {
-  //     date: window.moment({
-  //       week: Number(weekDateExp[2]),
-  //       year: Number(weekDateExp[1]),
-  //     }),
-  //     granularity: "month",
-  //   };
-  // }
-
-  const yearExp = YEAR_PREFIX.exec(inputStr);
+  const yearExp = YEAR_PATTERN.exec(inputStr);
   if (yearExp) {
     return {
       date: window.moment({

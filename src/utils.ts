@@ -23,8 +23,7 @@ export function isMetaPressed(e: MouseEvent | KeyboardEvent): boolean {
 
 function getDaysOfWeek(): string[] {
   const { moment } = window;
-  // biome-ignore lint/suspicious/noExplicitAny: Obsidian API lacks type
-  let weekStart = (moment.localeData() as any)._week.dow;
+  let weekStart = moment.localeData().firstDayOfWeek();
   const daysOfWeek = [
     "sunday",
     "monday",
