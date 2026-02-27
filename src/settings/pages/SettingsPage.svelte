@@ -4,7 +4,6 @@
 
   import type { Settings } from "src/settings";
   import SettingItem from "src/settings/components/SettingItem.svelte";
-  import Toggle from "src/settings/components/Toggle.svelte";
   import Dropdown from "src/settings/components/Dropdown.svelte";
   import Footer from "src/settings/components/Footer.svelte";
   import {
@@ -44,22 +43,6 @@
     <PeriodicGroup {app} {granularity} {settings} />
   {/each}
 </div>
-
-<SettingItem
-  name="Show &ldquo;Timeline&rdquo; complication on periodic notes"
-  description="Adds a collapsible timeline to the top-right of all periodic notes"
-  type="toggle"
-  isHeading={false}
->
-  {#snippet control()}
-    <Toggle
-      isEnabled={$settings.enableTimelineComplication}
-      onChange={(val) => {
-        $settings.enableTimelineComplication = val;
-      }}
-    />
-  {/snippet}
-</SettingItem>
 
 <h3>Localization</h3>
 <div class="setting-item-description">
