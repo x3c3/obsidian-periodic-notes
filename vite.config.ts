@@ -9,7 +9,7 @@ export default defineConfig({
     {
       name: "copy-styles",
       writeBundle() {
-        copyFileSync("src/styles.css", "dist/styles.css");
+        copyFileSync("src/styles.css", "styles.css");
       },
     },
   ],
@@ -22,7 +22,8 @@ export default defineConfig({
       formats: ["cjs"],
       fileName: () => "main.js",
     },
-    outDir: "dist",
+    outDir: ".",
+    emptyOutDir: false,
     sourcemap: process.env.NODE_ENV === "DEV" ? "inline" : false,
     rollupOptions: {
       external: ["obsidian", "electron", "fs", "os", "path"],
