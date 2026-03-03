@@ -23,8 +23,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            dist/main.js
-            dist/styles.css
+            main.js
+            styles.css
             manifest.json
           fail_on_unmatched_files: true
         env:
