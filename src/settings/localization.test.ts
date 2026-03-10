@@ -179,10 +179,10 @@ describe("overrideGlobalMomentWeekStart", () => {
 describe("configureGlobalMomentLocale", () => {
   test("uses system locale by default", () => {
     const result = configureGlobalMomentLocale();
-    // navigator.language is "en-US", obsidianLang starts with "en",
-    // so systemLang ("en-us") starts with obsidianLang ("en") => uses systemLang
-    expect(typeof result).toBe("string");
-    expect(result.length).toBeGreaterThan(0);
+    // navigator.language is "en-US", obsidianLang is "en",
+    // systemLang ("en-us") starts with obsidianLang => tries "en-us",
+    // moment falls back to closest match "en"
+    expect(result).toBe("en");
   });
 
   test("uses explicit locale override", () => {
@@ -197,8 +197,10 @@ describe("configureGlobalMomentLocale", () => {
 
   test("defaults weekStart to locale when not specified", () => {
     configureGlobalMomentLocale("system-default");
-    // Should use _bundledLocaleWeekSpec
-    expect(typeof moment.localeData().firstDayOfWeek()).toBe("number");
+    // Should restore to the saved bundled locale week start
+    expect(moment.localeData().firstDayOfWeek()).toBe(
+      window._bundledLocaleWeekSpec.dow,
+    );
   });
 });
 

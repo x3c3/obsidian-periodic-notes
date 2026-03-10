@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import moment from "moment";
 
-import type { Granularity } from "./types";
+import { type Granularity, granularities } from "./types";
 
 // @ts-expect-error global mock
 globalThis.window = { moment };
@@ -22,14 +22,6 @@ interface PeriodicNoteCachedMetadata {
   canonicalDateStr: string;
   matchData: PeriodicNoteMatchData;
 }
-
-const granularities: Granularity[] = [
-  "day",
-  "week",
-  "month",
-  "quarter",
-  "year",
-];
 
 function compareGranularity(a: Granularity, b: Granularity) {
   const idxA = granularities.indexOf(a);
