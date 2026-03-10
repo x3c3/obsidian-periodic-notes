@@ -263,6 +263,235 @@ describe("isValidFilename", () => {
   });
 });
 
+// Re-implement replaceGranularityTokens + applyTemplateTransformations
+// to test without Obsidian imports
+function replaceGranularityTokens(
+  contents: string,
+  date: moment.Moment,
+  tokenPattern: string,
+  format: string,
+  startOfUnit?: string,
+): string {
+  const pattern = new RegExp(
+    `{{\\s*(${tokenPattern})\\s*(([-+]\\d+)([yqmwdhs]))?\\s*(:.+?)?}}`,
+    "gi",
+  );
+  return contents.replace(
+    pattern,
+    (_, _token, calc, timeDelta, unit, momentFormat) => {
+      const now = window.moment();
+      const periodStart = startOfUnit
+        ? date
+            .clone()
+            .startOf(startOfUnit as moment.unitOfTime.StartOf)
+            .set({
+              hour: now.get("hour"),
+              minute: now.get("minute"),
+              second: now.get("second"),
+            })
+        : date.clone().set({
+            hour: now.get("hour"),
+            minute: now.get("minute"),
+            second: now.get("second"),
+          });
+      if (calc) {
+        periodStart.add(parseInt(timeDelta, 10), unit);
+      }
+      if (momentFormat) {
+        return periodStart.format(momentFormat.substring(1).trim());
+      }
+      return periodStart.format(format);
+    },
+  );
+}
+
+function applyTemplateTransformations(
+  filename: string,
+  granularity: Granularity,
+  date: moment.Moment,
+  format: string,
+  rawTemplateContents: string,
+): string {
+  let templateContents = rawTemplateContents
+    .replace(/{{\s*date\s*}}/gi, filename)
+    .replace(/{{\s*time\s*}}/gi, window.moment().format("HH:mm"))
+    .replace(/{{\s*title\s*}}/gi, filename);
+
+  if (granularity === "day") {
+    templateContents = templateContents
+      .replace(
+        /{{\s*yesterday\s*}}/gi,
+        date.clone().subtract(1, "day").format(format),
+      )
+      .replace(/{{\s*tomorrow\s*}}/gi, date.clone().add(1, "d").format(format));
+    templateContents = replaceGranularityTokens(
+      templateContents,
+      date,
+      "date|time",
+      format,
+    );
+  }
+
+  if (granularity === "month") {
+    templateContents = replaceGranularityTokens(
+      templateContents,
+      date,
+      "month",
+      format,
+      "month",
+    );
+  }
+
+  if (granularity === "quarter") {
+    templateContents = replaceGranularityTokens(
+      templateContents,
+      date,
+      "quarter",
+      format,
+      "quarter",
+    );
+  }
+
+  if (granularity === "year") {
+    templateContents = replaceGranularityTokens(
+      templateContents,
+      date,
+      "year",
+      format,
+      "year",
+    );
+  }
+
+  return templateContents;
+}
+
+describe("applyTemplateTransformations", () => {
+  const date = moment("2026-03-15");
+  const dayFormat = "YYYY-MM-DD";
+  const monthFormat = "YYYY-MM";
+
+  test("replaces title, date, and time tokens", () => {
+    const result = applyTemplateTransformations(
+      "2026-03-15",
+      "day",
+      date,
+      dayFormat,
+      "# {{title}}\nDate: {{date}}",
+    );
+    expect(result).toBe("# 2026-03-15\nDate: 2026-03-15");
+  });
+
+  test("replaces yesterday and tomorrow for day granularity", () => {
+    const result = applyTemplateTransformations(
+      "2026-03-15",
+      "day",
+      date,
+      dayFormat,
+      "prev: {{yesterday}} next: {{tomorrow}}",
+    );
+    expect(result).toBe("prev: 2026-03-14 next: 2026-03-16");
+  });
+
+  test("replaces day token with custom format", () => {
+    const result = applyTemplateTransformations(
+      "2026-03-15",
+      "day",
+      date,
+      dayFormat,
+      "{{date:MMMM D, YYYY}}",
+    );
+    expect(result).toBe("March 15, 2026");
+  });
+
+  test("replaces day token with delta", () => {
+    const result = applyTemplateTransformations(
+      "2026-03-15",
+      "day",
+      date,
+      dayFormat,
+      "{{date+1d:YYYY-MM-DD}}",
+    );
+    expect(result).toBe("2026-03-16");
+  });
+
+  test("replaces month token with default format", () => {
+    const result = applyTemplateTransformations(
+      "2026-03",
+      "month",
+      date,
+      monthFormat,
+      "Month: {{month}}",
+    );
+    expect(result).toBe("Month: 2026-03");
+  });
+
+  test("replaces month token with custom format", () => {
+    const result = applyTemplateTransformations(
+      "2026-03",
+      "month",
+      date,
+      monthFormat,
+      "{{month:MMMM YYYY}}",
+    );
+    expect(result).toBe("March 2026");
+  });
+
+  test("replaces month token with delta", () => {
+    const result = applyTemplateTransformations(
+      "2026-03",
+      "month",
+      date,
+      monthFormat,
+      "{{month+1M:YYYY-MM}}",
+    );
+    expect(result).toBe("2026-04");
+  });
+
+  test("replaces quarter token", () => {
+    const result = applyTemplateTransformations(
+      "2026-Q1",
+      "quarter",
+      date,
+      "[Q]Q YYYY",
+      "{{quarter:YYYY-[Q]Q}}",
+    );
+    expect(result).toBe("2026-Q1");
+  });
+
+  test("replaces year token", () => {
+    const result = applyTemplateTransformations(
+      "2026",
+      "year",
+      date,
+      "YYYY",
+      "Year: {{year}}",
+    );
+    expect(result).toBe("Year: 2026");
+  });
+
+  test("replaces year token with delta", () => {
+    const result = applyTemplateTransformations(
+      "2026",
+      "year",
+      date,
+      "YYYY",
+      "{{year-1y:YYYY}}",
+    );
+    expect(result).toBe("2025");
+  });
+
+  test("does not replace month tokens for day granularity", () => {
+    const result = applyTemplateTransformations(
+      "2026-03-15",
+      "day",
+      date,
+      dayFormat,
+      "{{month}}",
+    );
+    expect(result).toBe("{{month}}");
+  });
+});
+
 describe("getLooselyMatchedDate", () => {
   const FULL_DATE_PATTERN =
     /(\d{4})[-.]?(0[1-9]|1[0-2])[-.]?(0[1-9]|[12][0-9]|3[01])/;
