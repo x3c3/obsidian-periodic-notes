@@ -46,6 +46,46 @@ function getDayOfWeekNumericalValue(dayOfWeekName: string): number {
   return getDaysOfWeek().indexOf(dayOfWeekName.toLowerCase());
 }
 
+function replaceGranularityTokens(
+  contents: string,
+  date: Moment,
+  tokenPattern: string,
+  format: string,
+  startOfUnit?: string,
+): string {
+  const pattern = new RegExp(
+    `{{\\s*(${tokenPattern})\\s*(([-+]\\d+)([yqmwdhs]))?\\s*(:.+?)?}}`,
+    "gi",
+  );
+  return contents.replace(
+    pattern,
+    (_, _token, calc, timeDelta, unit, momentFormat) => {
+      const now = window.moment();
+      const periodStart = startOfUnit
+        ? date
+            .clone()
+            .startOf(startOfUnit as moment.unitOfTime.StartOf)
+            .set({
+              hour: now.get("hour"),
+              minute: now.get("minute"),
+              second: now.get("second"),
+            })
+        : date.clone().set({
+            hour: now.get("hour"),
+            minute: now.get("minute"),
+            second: now.get("second"),
+          });
+      if (calc) {
+        periodStart.add(parseInt(timeDelta, 10), unit);
+      }
+      if (momentFormat) {
+        return periodStart.format(momentFormat.substring(1).trim());
+      }
+      return periodStart.format(format);
+    },
+  );
+}
+
 export function applyTemplateTransformations(
   filename: string,
   granularity: Granularity,
@@ -53,9 +93,7 @@ export function applyTemplateTransformations(
   format: string,
   rawTemplateContents: string,
 ): string {
-  let templateContents = rawTemplateContents;
-
-  templateContents = rawTemplateContents
+  let templateContents = rawTemplateContents
     .replace(/{{\s*date\s*}}/gi, filename)
     .replace(/{{\s*time\s*}}/gi, window.moment().format("HH:mm"))
     .replace(/{{\s*title\s*}}/gi, filename);
@@ -66,26 +104,13 @@ export function applyTemplateTransformations(
         /{{\s*yesterday\s*}}/gi,
         date.clone().subtract(1, "day").format(format),
       )
-      .replace(/{{\s*tomorrow\s*}}/gi, date.clone().add(1, "d").format(format))
-      .replace(
-        /{{\s*(date|time)\s*(([+-]\d+)([yqmwdhs]))?\s*(:.+?)?}}/gi,
-        (_, _timeOrDate, calc, timeDelta, unit, momentFormat) => {
-          const now = window.moment();
-          const currentDate = date.clone().set({
-            hour: now.get("hour"),
-            minute: now.get("minute"),
-            second: now.get("second"),
-          });
-          if (calc) {
-            currentDate.add(parseInt(timeDelta, 10), unit);
-          }
-
-          if (momentFormat) {
-            return currentDate.format(momentFormat.substring(1).trim());
-          }
-          return currentDate.format(format);
-        },
-      );
+      .replace(/{{\s*tomorrow\s*}}/gi, date.clone().add(1, "d").format(format));
+    templateContents = replaceGranularityTokens(
+      templateContents,
+      date,
+      "date|time",
+      format,
+    );
   }
 
   if (granularity === "week") {
@@ -99,77 +124,32 @@ export function applyTemplateTransformations(
   }
 
   if (granularity === "month") {
-    templateContents = templateContents.replace(
-      /{{\s*(month)\s*(([+-]\d+)([yqmwdhs]))?\s*(:.+?)?}}/gi,
-      (_, _timeOrDate, calc, timeDelta, unit, momentFormat) => {
-        const now = window.moment();
-        const monthStart = date
-          .clone()
-          .startOf("month")
-          .set({
-            hour: now.get("hour"),
-            minute: now.get("minute"),
-            second: now.get("second"),
-          });
-        if (calc) {
-          monthStart.add(parseInt(timeDelta, 10), unit);
-        }
-
-        if (momentFormat) {
-          return monthStart.format(momentFormat.substring(1).trim());
-        }
-        return monthStart.format(format);
-      },
+    templateContents = replaceGranularityTokens(
+      templateContents,
+      date,
+      "month",
+      format,
+      "month",
     );
   }
 
   if (granularity === "quarter") {
-    templateContents = templateContents.replace(
-      /{{\s*(quarter)\s*(([+-]\d+)([yqmwdhs]))?\s*(:.+?)?}}/gi,
-      (_, _timeOrDate, calc, timeDelta, unit, momentFormat) => {
-        const now = window.moment();
-        const periodStart = date
-          .clone()
-          .startOf("quarter")
-          .set({
-            hour: now.get("hour"),
-            minute: now.get("minute"),
-            second: now.get("second"),
-          });
-        if (calc) {
-          periodStart.add(parseInt(timeDelta, 10), unit);
-        }
-
-        if (momentFormat) {
-          return periodStart.format(momentFormat.substring(1).trim());
-        }
-        return periodStart.format(format);
-      },
+    templateContents = replaceGranularityTokens(
+      templateContents,
+      date,
+      "quarter",
+      format,
+      "quarter",
     );
   }
 
   if (granularity === "year") {
-    templateContents = templateContents.replace(
-      /{{\s*(year)\s*(([+-]\d+)([yqmwdhs]))?\s*(:.+?)?}}/gi,
-      (_, _timeOrDate, calc, timeDelta, unit, momentFormat) => {
-        const now = window.moment();
-        const periodStart = date
-          .clone()
-          .startOf("year")
-          .set({
-            hour: now.get("hour"),
-            minute: now.get("minute"),
-            second: now.get("second"),
-          });
-        if (calc) {
-          periodStart.add(parseInt(timeDelta, 10), unit);
-        }
-
-        if (momentFormat) {
-          return periodStart.format(momentFormat.substring(1).trim());
-        }
-        return periodStart.format(format);
-      },
+    templateContents = replaceGranularityTokens(
+      templateContents,
+      date,
+      "year",
+      format,
+      "year",
     );
   }
 
