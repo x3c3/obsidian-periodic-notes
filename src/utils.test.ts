@@ -42,6 +42,14 @@ function isIsoFormat(format: string): boolean {
 
 type Settings = Record<Granularity, PeriodicConfig | undefined>;
 
+const emptySettings: Settings = {
+  day: undefined,
+  week: undefined,
+  month: undefined,
+  quarter: undefined,
+  year: undefined,
+};
+
 function getFormat(settings: Settings, granularity: Granularity): string {
   return settings[granularity]?.format || DEFAULT_FORMAT[granularity];
 }
@@ -132,14 +140,6 @@ describe("isIsoFormat", () => {
 });
 
 describe("getFormat", () => {
-  const emptySettings: Settings = {
-    day: undefined,
-    week: undefined,
-    month: undefined,
-    quarter: undefined,
-    year: undefined,
-  };
-
   test("returns default format when no config", () => {
     expect(getFormat(emptySettings, "day")).toBe("YYYY-MM-DD");
   });
@@ -166,14 +166,6 @@ describe("getFormat", () => {
 });
 
 describe("getPossibleFormats", () => {
-  const emptySettings: Settings = {
-    day: undefined,
-    week: undefined,
-    month: undefined,
-    quarter: undefined,
-    year: undefined,
-  };
-
   test("returns default when no config", () => {
     const result = getPossibleFormats(emptySettings, "day");
     expect(result).toEqual(["YYYY-MM-DD"]);
@@ -199,14 +191,6 @@ describe("getPossibleFormats", () => {
 });
 
 describe("getFolder", () => {
-  const emptySettings: Settings = {
-    day: undefined,
-    week: undefined,
-    month: undefined,
-    quarter: undefined,
-    year: undefined,
-  };
-
   test("returns root when no config", () => {
     expect(getFolder(emptySettings, "day")).toBe("/");
   });
@@ -522,38 +506,6 @@ describe("applyTemplateTransformations", () => {
   });
 });
 
-describe("getLooselyMatchedDate", () => {
-  const FULL_DATE_PATTERN =
-    /(\d{4})[-.]?(0[1-9]|1[0-2])[-.]?(0[1-9]|[12][0-9]|3[01])/;
-  const MONTH_PATTERN = /(\d{4})[-.]?(0[1-9]|1[0-2])/;
-  const YEAR_PATTERN = /(\d{4})/;
-
-  test("matches full date", () => {
-    expect(FULL_DATE_PATTERN.test("2026-01-15")).toBe(true);
-    expect(FULL_DATE_PATTERN.test("20260115")).toBe(true);
-    expect(FULL_DATE_PATTERN.test("2026.01.15")).toBe(true);
-  });
-
-  test("matches month pattern", () => {
-    expect(MONTH_PATTERN.test("2026-01")).toBe(true);
-    expect(MONTH_PATTERN.test("202601")).toBe(true);
-  });
-
-  test("matches year pattern", () => {
-    expect(YEAR_PATTERN.test("2026")).toBe(true);
-  });
-
-  test("does not match invalid month", () => {
-    const match = FULL_DATE_PATTERN.exec("2026-13-01");
-    expect(match).toBeNull();
-  });
-
-  test("does not match invalid day", () => {
-    const match = FULL_DATE_PATTERN.exec("2026-01-32");
-    expect(match).toBeNull();
-  });
-});
-
 // Re-implement additional pure functions for testing
 
 function getRelativeDate(granularity: Granularity, date: moment.Moment) {
@@ -663,14 +615,6 @@ describe("getRelativeDate", () => {
 });
 
 describe("getConfig", () => {
-  const emptySettings: Settings = {
-    day: undefined,
-    week: undefined,
-    month: undefined,
-    quarter: undefined,
-    year: undefined,
-  };
-
   test("returns default config when no setting", () => {
     const config = getConfig(emptySettings, "day");
     expect(config.enabled).toBe(false);

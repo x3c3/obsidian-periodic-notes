@@ -129,12 +129,6 @@ describe("getLooselyMatchedDate", () => {
     expect(result?.date.format("YYYY-MM")).toBe("2026-01");
   });
 
-  test("prioritizes full date over month", () => {
-    // "2026-03-15" matches full date pattern first
-    const result = getLooselyMatchedDate("2026-03-15");
-    expect(result?.granularity).toBe("day");
-  });
-
   test("matches date at boundaries (Jan 01, Dec 31)", () => {
     const jan1 = getLooselyMatchedDate("2026-01-01");
     expect(jan1?.granularity).toBe("day");
