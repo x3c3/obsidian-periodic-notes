@@ -74,7 +74,6 @@ export class NLDNavigator extends SuggestModal<DateNavigationItem> {
     }
   }
 
-  /** XXX: this is pretty messy currently. Not sure if I like the format yet */
   private getPeriodicNotesFromQuery(query: string, date: Moment) {
     let granularity: Granularity = "day";
 
@@ -83,28 +82,28 @@ export class NLDNavigator extends SuggestModal<DateNavigationItem> {
       granularity = granularityExp[1] as Granularity;
     }
 
-    let label = "";
-    if (granularity === "week") {
-      const format = getFormat(get(this.plugin.settings), "week");
-      const weekNumber = isIsoFormat(format) ? "WW" : "ww";
-      label = date.format(`GGGG [Week] ${weekNumber}`);
-    } else if (granularity === "day") {
-      label = `${getRelativeDate(granularity, date)}, ${date.format("MMMM DD")}`;
-    } else {
-      label = query;
-    }
-
-    const suggestions = [
-      {
-        label,
-        date,
-        granularity,
+    const labelFormatters: Record<
+      Granularity,
+      (d: Moment, q: string) => string
+    > = {
+      day: (d) => `${getRelativeDate("day", d)}, ${d.format("MMMM DD")}`,
+      week: (d) => {
+        const format = getFormat(get(this.plugin.settings), "week");
+        const weekNumber = isIsoFormat(format) ? "WW" : "ww";
+        return d.format(`GGGG [Week] ${weekNumber}`);
       },
-    ];
+      month: (_d, q) => q,
+      quarter: (_d, q) => q,
+      year: (_d, q) => q,
+    };
+
+    const label = labelFormatters[granularity](date, query);
+
+    const suggestions: DateNavigationItem[] = [{ label, date, granularity }];
 
     if (granularity !== "day") {
       suggestions.push({
-        label: `${getRelativeDate(granularity, date)}, ${date.format("MMMM DD")}`,
+        label: `${getRelativeDate("day", date)}, ${date.format("MMMM DD")}`,
         date,
         granularity: "day",
       });
