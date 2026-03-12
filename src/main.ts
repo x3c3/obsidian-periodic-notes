@@ -3,6 +3,8 @@ import { addIcon, Plugin, type TFile } from "obsidian";
 import { get, type Writable, writable } from "svelte/store";
 
 import { type PeriodicNoteCachedMetadata, PeriodicNotesCache } from "./cache";
+import { VIEW_TYPE_CALENDAR } from "./calendar/constants";
+import { CalendarView } from "./calendar/view";
 import { displayConfigs, getCommands } from "./commands";
 import { DEFAULT_PERIODIC_CONFIG } from "./constants";
 import {
@@ -79,6 +81,39 @@ export default class PeriodicNotesPlugin extends Plugin {
         new NLDNavigator(this.app, this).open();
       },
       hotkeys: [],
+    });
+
+    // Calendar view
+    this.registerView(
+      VIEW_TYPE_CALENDAR,
+      (leaf) => new CalendarView(leaf, this),
+    );
+
+    this.addCommand({
+      id: "show-calendar",
+      name: "Show calendar",
+      checkCallback: (checking: boolean) => {
+        if (checking) {
+          return (
+            this.app.workspace.getLeavesOfType(VIEW_TYPE_CALENDAR).length === 0
+          );
+        }
+        this.app.workspace.getRightLeaf(false)?.setViewState({
+          type: VIEW_TYPE_CALENDAR,
+        });
+      },
+    });
+
+    this.addCommand({
+      id: "reveal-active-note",
+      name: "Reveal active note in calendar",
+      checkCallback: (checking: boolean) => {
+        const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_CALENDAR);
+        if (leaves.length === 0) return false;
+        if (checking) return true;
+        const view = leaves[0].view as CalendarView;
+        view.revealActiveNote();
+      },
     });
 
     this.app.workspace.onLayoutReady(() => {
