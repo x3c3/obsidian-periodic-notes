@@ -13,16 +13,16 @@ export default class CalendarFileStore {
     this.store = writable(0);
 
     plugin.app.workspace.onLayoutReady(() => {
-      const { vault } = plugin.app;
+      const { vault, metadataCache, workspace } = plugin.app;
       component.registerEvent(vault.on("create", this.bump, this));
       component.registerEvent(vault.on("delete", this.bump, this));
       component.registerEvent(vault.on("rename", this.bump, this));
+      component.registerEvent(metadataCache.on("changed", this.bump, this));
       component.registerEvent(
-        plugin.app.workspace.on(
-          "periodic-notes:settings-updated",
-          this.bump,
-          this,
-        ),
+        workspace.on("periodic-notes:resolve", this.bump, this),
+      );
+      component.registerEvent(
+        workspace.on("periodic-notes:settings-updated", this.bump, this),
       );
       // Re-read cache after layout is ready (cache populates in its own onLayoutReady)
       this.bump();

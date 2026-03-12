@@ -79,7 +79,7 @@ export class CalendarView extends ItemView {
       this,
       targetEl,
       formattedDate,
-      file?.path,
+      file?.path ?? "",
     );
   }
 
