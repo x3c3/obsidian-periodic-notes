@@ -43,12 +43,14 @@
 
   let monthFile: TFile | null = $state(null);
   let yearFile: TFile | null = $state(null);
-  let monthEnabled = $derived(fileStore.isGranularityEnabled("month"));
-  let yearEnabled = $derived(fileStore.isGranularityEnabled("year"));
+  let monthEnabled: boolean = $state(fileStore.isGranularityEnabled("month"));
+  let yearEnabled: boolean = $state(fileStore.isGranularityEnabled("year"));
 
   $effect(() => {
     $displayedMonth;
     return fileStore.store.subscribe(() => {
+      monthEnabled = fileStore.isGranularityEnabled("month");
+      yearEnabled = fileStore.isGranularityEnabled("year");
       monthFile = monthEnabled
         ? fileStore.getFile($displayedMonth, "month")
         : null;

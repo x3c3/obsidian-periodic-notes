@@ -10,6 +10,7 @@ import CalendarFileStore from "./fileStore";
 interface CalendarExports {
   tick: () => void;
   setDisplayedMonth: (date: Moment) => void;
+  setActiveFilePath: (path: string | null) => void;
 }
 
 export class CalendarView extends ItemView {
@@ -58,7 +59,13 @@ export class CalendarView extends ItemView {
         onContextMenu: this.onContextMenu.bind(this),
       },
     });
-    if (!("tick" in cal && "setDisplayedMonth" in cal)) {
+    if (
+      !(
+        "tick" in cal &&
+        "setDisplayedMonth" in cal &&
+        "setActiveFilePath" in cal
+      )
+    ) {
       throw new Error("Calendar component missing expected exports");
     }
     this.calendar = cal as CalendarExports;
@@ -127,6 +134,7 @@ export class CalendarView extends ItemView {
     this.activeFilePath = file?.path ?? null;
 
     if (this.calendar) {
+      this.calendar.setActiveFilePath(this.activeFilePath);
       this.calendar.tick();
 
       if (file) {
