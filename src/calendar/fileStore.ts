@@ -24,6 +24,8 @@ export default class CalendarFileStore {
           this,
         ),
       );
+      // Re-read cache after layout is ready (cache populates in its own onLayoutReady)
+      this.bump();
     });
   }
 

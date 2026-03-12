@@ -10,7 +10,7 @@ export function isWeekend(date: Moment): boolean {
 }
 
 export function getStartOfWeek(days: Moment[]): Moment {
-  return days[0].clone().weekday(0);
+  return days[0].clone();
 }
 
 export function getMonth(displayedMonth: Moment): IMonth {

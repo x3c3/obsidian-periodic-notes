@@ -16,18 +16,18 @@
     onHover,
     onClick,
     onContextMenu,
-    activeFilePath = null,
   }: {
     fileStore: CalendarFileStore;
     onHover: IEventHandlers["onHover"];
     onClick: IEventHandlers["onClick"];
     onContextMenu: IEventHandlers["onContextMenu"];
-    activeFilePath: string | null;
   } = $props();
+
+  let activeFilePath: string | null = $state(null);
 
   let today: Moment = $state.raw(window.moment());
 
-  let displayedMonthStore = writable<Moment>(window.moment());
+  const displayedMonthStore = writable<Moment>(window.moment());
   setContext(DISPLAYED_MONTH, displayedMonthStore);
 
   let showWeekNums: boolean = $state(fileStore.isGranularityEnabled("week"));
@@ -52,10 +52,6 @@
 
   export function tick() {
     today = window.moment();
-  }
-
-  export function setDisplayedMonth(date: Moment) {
-    displayedMonthStore.set(date);
   }
 
   export function setActiveFilePath(path: string | null) {

@@ -9,14 +9,12 @@ import CalendarFileStore from "./fileStore";
 
 interface CalendarExports {
   tick: () => void;
-  setDisplayedMonth: (date: Moment) => void;
   setActiveFilePath: (path: string | null) => void;
 }
 
 export class CalendarView extends ItemView {
   private calendar!: CalendarExports;
   private plugin: PeriodicNotesPlugin;
-  private activeFilePath: string | null = null;
 
   constructor(leaf: WorkspaceLeaf, plugin: PeriodicNotesPlugin) {
     super(leaf);
@@ -39,11 +37,10 @@ export class CalendarView extends ItemView {
     return "calendar-day";
   }
 
-  onClose(): Promise<void> {
+  async onClose(): Promise<void> {
     if (this.calendar) {
       unmount(this.calendar);
     }
-    return Promise.resolve();
   }
 
   async onOpen(): Promise<void> {
@@ -53,19 +50,12 @@ export class CalendarView extends ItemView {
       target: this.contentEl,
       props: {
         fileStore,
-        activeFilePath: this.activeFilePath,
         onHover: this.onHover.bind(this),
         onClick: this.onClick.bind(this),
         onContextMenu: this.onContextMenu.bind(this),
       },
     });
-    if (
-      !(
-        "tick" in cal &&
-        "setDisplayedMonth" in cal &&
-        "setActiveFilePath" in cal
-      )
-    ) {
+    if (!("tick" in cal && "setActiveFilePath" in cal)) {
       throw new Error("Calendar component missing expected exports");
     }
     this.calendar = cal as CalendarExports;
@@ -130,30 +120,10 @@ export class CalendarView extends ItemView {
 
   private onFileOpen(_file: TFile | null): void {
     if (!this.app.workspace.layoutReady) return;
-    const file = this.app.workspace.getActiveFile();
-    this.activeFilePath = file?.path ?? null;
-
     if (this.calendar) {
-      this.calendar.setActiveFilePath(this.activeFilePath);
+      const path = this.app.workspace.getActiveFile()?.path ?? null;
+      this.calendar.setActiveFilePath(path);
       this.calendar.tick();
-
-      if (file) {
-        const cached = this.plugin.findInCache(file.path);
-        if (cached) {
-          this.calendar.setDisplayedMonth(cached.date);
-        }
-      }
-    }
-  }
-
-  public revealActiveNote(): void {
-    if (!this.calendar) return;
-    const file = this.app.workspace.getActiveFile();
-    if (!file) return;
-
-    const cached = this.plugin.findInCache(file.path);
-    if (cached) {
-      this.calendar.setDisplayedMonth(cached.date);
     }
   }
 }

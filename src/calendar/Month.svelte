@@ -5,9 +5,9 @@
   import type { Writable } from "svelte/store";
 
   import { isMetaPressed } from "src/utils";
-  import type { Granularity } from "src/types";
   import { DISPLAYED_MONTH } from "./context";
   import type CalendarFileStore from "./fileStore";
+  import type { IEventHandlers } from "./types";
 
   let {
     fileStore,
@@ -17,25 +17,9 @@
     resetDisplayedMonth,
   }: {
     fileStore: CalendarFileStore;
-    onHover: (
-      granularity: Granularity,
-      date: Moment,
-      file: TFile | null,
-      targetEl: EventTarget,
-      isMetaPressed: boolean,
-    ) => void;
-    onClick: (
-      granularity: Granularity,
-      date: Moment,
-      existingFile: TFile | null,
-      inNewSplit: boolean,
-    ) => void;
-    onContextMenu: (
-      granularity: Granularity,
-      date: Moment,
-      file: TFile | null,
-      event: MouseEvent,
-    ) => void;
+    onHover: IEventHandlers["onHover"];
+    onClick: IEventHandlers["onClick"];
+    onContextMenu: IEventHandlers["onContextMenu"];
     resetDisplayedMonth: () => void;
   } = $props();
 
