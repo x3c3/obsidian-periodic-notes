@@ -104,18 +104,6 @@ export default class PeriodicNotesPlugin extends Plugin {
       },
     });
 
-    this.addCommand({
-      id: "reveal-active-note",
-      name: "Reveal active note in calendar",
-      checkCallback: (checking: boolean) => {
-        const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_CALENDAR);
-        if (leaves.length === 0) return false;
-        if (checking) return true;
-        const view = leaves[0].view as CalendarView;
-        view.revealActiveNote();
-      },
-    });
-
     this.app.workspace.onLayoutReady(() => {
       const startupGranularity = findStartupNoteConfig(this.settings);
       if (startupGranularity) {

@@ -3,8 +3,8 @@
   import type { TFile } from "obsidian";
 
   import { isMetaPressed } from "src/utils";
-  import type { Granularity } from "src/types";
   import type CalendarFileStore from "./fileStore";
+  import type { IEventHandlers } from "./types";
   import { getStartOfWeek } from "./utils";
 
   let {
@@ -18,25 +18,9 @@
   }: {
     weekNum: number;
     days: Moment[];
-    onHover: (
-      granularity: Granularity,
-      date: Moment,
-      file: TFile | null,
-      targetEl: EventTarget,
-      isMetaPressed: boolean,
-    ) => void;
-    onClick: (
-      granularity: Granularity,
-      date: Moment,
-      existingFile: TFile | null,
-      inNewSplit: boolean,
-    ) => void;
-    onContextMenu: (
-      granularity: Granularity,
-      date: Moment,
-      file: TFile | null,
-      event: MouseEvent,
-    ) => void;
+    onHover: IEventHandlers["onHover"];
+    onClick: IEventHandlers["onClick"];
+    onContextMenu: IEventHandlers["onContextMenu"];
     fileStore: CalendarFileStore;
     activeFilePath: string | null;
   } = $props();
