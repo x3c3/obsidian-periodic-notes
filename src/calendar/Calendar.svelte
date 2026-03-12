@@ -44,14 +44,10 @@
   });
 
   let month: IMonth = $state.raw(getMonth(window.moment()));
-  let daysOfWeek: string[] = $state.raw(getDaysOfWeek());
+  const daysOfWeek: string[] = getDaysOfWeek();
 
   $effect(() => {
     month = getMonth($displayedMonthStore);
-  });
-
-  $effect(() => {
-    daysOfWeek = getDaysOfWeek();
   });
 
   export function tick() {
@@ -60,6 +56,10 @@
 
   export function setDisplayedMonth(date: Moment) {
     displayedMonthStore.set(date);
+  }
+
+  export function setActiveFilePath(path: string | null) {
+    activeFilePath = path;
   }
 </script>
 
@@ -85,7 +85,7 @@
       </tr>
     </thead>
     <tbody>
-      {#each month as week (week.weekNum)}
+      {#each month as week (week.days[0].format("YYYY-[W]WW"))}
         <tr>
           {#if showWeekNums}
             <WeekNum
