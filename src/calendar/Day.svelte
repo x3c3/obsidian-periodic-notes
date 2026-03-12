@@ -54,12 +54,20 @@
 
 <td>
   <div
+    role="button"
+    tabindex="0"
     class="day"
     class:active={file !== null && file.path === activeFilePath}
     class:adjacent-month={!date.isSame($displayedMonth, "month")}
     class:has-note={file !== null}
     class:today={date.isSame(today, "day")}
     onclick={handleClick}
+    onkeydown={(e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        onClick?.("day", date, file, false);
+      }
+    }}
     oncontextmenu={handleContextmenu}
     onpointerenter={handleHover}
   >
