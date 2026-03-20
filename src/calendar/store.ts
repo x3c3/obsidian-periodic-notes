@@ -3,11 +3,11 @@ import type { Component, TAbstractFile, TFile } from "obsidian";
 import { DEFAULT_FORMAT } from "src/constants";
 import type PeriodicNotesPlugin from "src/main";
 import type { Granularity } from "src/types";
-import { get, type Writable, writable } from "svelte/store";
+import { type Writable, writable } from "svelte/store";
 
-import type { FileMap, IMonth } from "./types";
+import type { FileMap, Month } from "./types";
 
-export default class CalendarFileStore {
+export default class CalendarStore {
   // Svelte 5 runes don't track store auto-subscriptions.
   // Bumping a counter triggers subscribers to re-read plugin state.
   public store: Writable<number>;
@@ -33,7 +33,6 @@ export default class CalendarFileStore {
           this,
         ),
       );
-      // Re-read cache after layout is ready (cache populates in its own onLayoutReady)
       this.bump();
     });
   }
@@ -58,14 +57,15 @@ export default class CalendarFileStore {
   }
 
   public isGranularityEnabled(granularity: Granularity): boolean {
-    const settings = get(this.plugin.settings);
-    return settings[granularity]?.enabled ?? granularity === "day";
+    return (
+      this.plugin.settings.granularities[granularity]?.enabled ??
+      granularity === "day"
+    );
   }
 
   public getEnabledGranularities(): Granularity[] {
-    const settings = get(this.plugin.settings);
     return (["week", "month", "year"] as Granularity[]).filter(
-      (g) => settings[g]?.enabled,
+      (g) => this.plugin.settings.granularities[g]?.enabled,
     );
   }
 }
@@ -75,7 +75,7 @@ export function fileMapKey(granularity: Granularity, date: Moment): string {
 }
 
 export function computeFileMap(
-  month: IMonth,
+  month: Month,
   getFile: (date: Moment, granularity: Granularity) => TFile | null,
   enabledGranularities: Granularity[],
 ): FileMap {

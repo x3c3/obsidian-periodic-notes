@@ -1,9 +1,9 @@
 <script lang="ts">
   import type { Moment } from "moment";
 
-  import { isMetaPressed } from "src/utils";
-  import { fileMapKey } from "./fileStore";
-  import type { FileMap, IEventHandlers } from "./types";
+  import { isMetaPressed } from "./utils";
+  import { fileMapKey } from "./store";
+  import type { FileMap, EventHandlers } from "./types";
   import { getStartOfWeek } from "./utils";
 
   let {
@@ -17,9 +17,9 @@
   }: {
     weekNum: number;
     days: Moment[];
-    onHover: IEventHandlers["onHover"];
-    onClick: IEventHandlers["onClick"];
-    onContextMenu: IEventHandlers["onContextMenu"];
+    onHover: EventHandlers["onHover"];
+    onClick: EventHandlers["onClick"];
+    onContextMenu: EventHandlers["onContextMenu"];
     fileMap: FileMap;
     activeFilePath: string | null;
   } = $props();

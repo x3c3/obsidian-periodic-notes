@@ -3,14 +3,14 @@
   import { setContext } from "svelte";
   import { writable } from "svelte/store";
 
-  import { DISPLAYED_MONTH } from "./context";
+  import { DISPLAYED_MONTH } from "src/constants";
   import Day from "./Day.svelte";
-  import type CalendarFileStore from "./fileStore";
-  import { computeFileMap, fileMapKey } from "./fileStore";
+  import type CalendarStore from "./store";
+  import { computeFileMap, fileMapKey } from "./store";
   import Nav from "./Nav.svelte";
-  import type { FileMap, IEventHandlers, IMonth } from "./types";
+  import type { FileMap, EventHandlers, Month } from "./types";
   import { getMonth, getWeekdayLabels, isWeekend } from "./utils";
-  import WeekNum from "./WeekNum.svelte";
+  import Week from "./Week.svelte";
 
   let {
     fileStore,
@@ -18,10 +18,10 @@
     onClick,
     onContextMenu,
   }: {
-    fileStore: CalendarFileStore;
-    onHover: IEventHandlers["onHover"];
-    onClick: IEventHandlers["onClick"];
-    onContextMenu: IEventHandlers["onContextMenu"];
+    fileStore: CalendarStore;
+    onHover: EventHandlers["onHover"];
+    onClick: EventHandlers["onClick"];
+    onContextMenu: EventHandlers["onContextMenu"];
   } = $props();
 
   let activeFilePath: string | null = $state(null);
@@ -31,8 +31,8 @@
   const displayedMonthStore = writable<Moment>(window.moment());
   setContext(DISPLAYED_MONTH, displayedMonthStore);
 
-  let month: IMonth = $state.raw(getMonth(window.moment()));
-  let showWeekNums: boolean = $state(false);
+  let month: Month = $state.raw(getMonth(window.moment()));
+  let showWeeks: boolean = $state(false);
   let fileMap: FileMap = $state.raw(new Map());
 
   $effect(() => {
@@ -44,7 +44,7 @@
   $effect(() => {
     const currentMonth = month;
     return fileStore.store.subscribe(() => {
-      showWeekNums = fileStore.isGranularityEnabled("week");
+      showWeeks = fileStore.isGranularityEnabled("week");
       fileMap = computeFileMap(
         currentMonth,
         (date, granularity) => fileStore.getFile(date, granularity),
@@ -53,7 +53,7 @@
     });
   });
 
-  let eventHandlers: IEventHandlers = $derived({
+  let eventHandlers: EventHandlers = $derived({
     onHover,
     onClick,
     onContextMenu,
@@ -77,7 +77,7 @@
   <Nav {fileMap} {today} {eventHandlers} />
   <table class="calendar">
     <colgroup>
-      {#if showWeekNums}
+      {#if showWeeks}
         <col />
       {/if}
       {#each month[1].days as date}
@@ -86,7 +86,7 @@
     </colgroup>
     <thead>
       <tr>
-        {#if showWeekNums}
+        {#if showWeeks}
           <th>W</th>
         {/if}
         {#each daysOfWeek as dayOfWeek}
@@ -97,8 +97,8 @@
     <tbody>
       {#each month as week (fileMapKey("week", week.days[0]))}
         <tr>
-          {#if showWeekNums}
-            <WeekNum
+          {#if showWeeks}
+            <Week
               {fileMap}
               {activeFilePath}
               {...week}

@@ -5,10 +5,10 @@
   import type { Writable } from "svelte/store";
 
   import type { Granularity } from "src/types";
-  import { isMetaPressed } from "src/utils";
-  import { DISPLAYED_MONTH } from "./context";
-  import { fileMapKey } from "./fileStore";
-  import type { FileMap, IEventHandlers } from "./types";
+  import { isMetaPressed } from "./utils";
+  import { DISPLAYED_MONTH } from "src/constants";
+  import { fileMapKey } from "./store";
+  import type { FileMap, EventHandlers } from "./types";
 
   let {
     fileMap,
@@ -18,9 +18,9 @@
     resetDisplayedMonth,
   }: {
     fileMap: FileMap;
-    onHover: IEventHandlers["onHover"];
-    onClick: IEventHandlers["onClick"];
-    onContextMenu: IEventHandlers["onContextMenu"];
+    onHover: EventHandlers["onHover"];
+    onClick: EventHandlers["onClick"];
+    onContextMenu: EventHandlers["onContextMenu"];
     resetDisplayedMonth: () => void;
   } = $props();
 

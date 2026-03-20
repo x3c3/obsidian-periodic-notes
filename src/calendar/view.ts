@@ -3,9 +3,9 @@ import { ItemView, Menu, type TFile, type WorkspaceLeaf } from "obsidian";
 import type PeriodicNotesPlugin from "src/main";
 import type { Granularity } from "src/types";
 import { mount, unmount } from "svelte";
+import { VIEW_TYPE_CALENDAR } from "src/constants";
 import Calendar from "./Calendar.svelte";
-import { VIEW_TYPE_CALENDAR } from "./constants";
-import CalendarFileStore from "./fileStore";
+import CalendarStore from "./store";
 
 interface CalendarExports {
   tick: () => void;
@@ -44,7 +44,7 @@ export class CalendarView extends ItemView {
   }
 
   async onOpen(): Promise<void> {
-    const fileStore = new CalendarFileStore(this, this.plugin);
+    const fileStore = new CalendarStore(this, this.plugin);
 
     const cal = mount(Calendar, {
       target: this.contentEl,
