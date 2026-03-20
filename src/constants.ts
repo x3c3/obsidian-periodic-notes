@@ -1,24 +1,27 @@
-const DEFAULT_DAILY_NOTE_FORMAT = "YYYY-MM-DD";
-const DEFAULT_WEEKLY_NOTE_FORMAT = "gggg-[W]ww";
-const DEFAULT_MONTHLY_NOTE_FORMAT = "YYYY-MM";
-const DEFAULT_QUARTERLY_NOTE_FORMAT = "YYYY-[Q]Q";
-const DEFAULT_YEARLY_NOTE_FORMAT = "YYYY";
+import type { Granularity, NoteConfig, Settings } from "./types";
 
-export const DEFAULT_FORMAT = Object.freeze({
-  day: DEFAULT_DAILY_NOTE_FORMAT,
-  week: DEFAULT_WEEKLY_NOTE_FORMAT,
-  month: DEFAULT_MONTHLY_NOTE_FORMAT,
-  quarter: DEFAULT_QUARTERLY_NOTE_FORMAT,
-  year: DEFAULT_YEARLY_NOTE_FORMAT,
-});
+export const DEFAULT_FORMAT: Record<Granularity, string> = {
+  day: "YYYY-MM-DD",
+  week: "gggg-[W]ww",
+  month: "YYYY-MM",
+  year: "YYYY",
+};
 
-export const DEFAULT_PERIODIC_CONFIG = Object.freeze({
+export const DEFAULT_CONFIG: NoteConfig = {
   enabled: false,
-  openAtStartup: false,
   format: "",
-  templatePath: undefined,
   folder: "",
-});
+  templatePath: undefined,
+};
+
+export const DEFAULT_SETTINGS: Settings = {
+  granularities: {
+    day: { ...DEFAULT_CONFIG },
+    week: { ...DEFAULT_CONFIG },
+    month: { ...DEFAULT_CONFIG },
+    year: { ...DEFAULT_CONFIG },
+  },
+};
 
 export const WEEKDAYS = [
   "sunday",
@@ -32,8 +35,11 @@ export const WEEKDAYS = [
 
 export type WeekdayName = (typeof WEEKDAYS)[number];
 
-export const HUMANIZE_FORMAT = Object.freeze({
+export const HUMANIZE_FORMAT: Partial<Record<Granularity, string>> = {
   month: "MMMM YYYY",
-  quarter: "YYYY Q[Q]",
   year: "YYYY",
-});
+};
+
+export const VIEW_TYPE_CALENDAR = "calendar";
+
+export const DISPLAYED_MONTH = Symbol("displayedMonth");
