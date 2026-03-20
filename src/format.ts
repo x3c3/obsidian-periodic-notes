@@ -1,5 +1,10 @@
 import { DEFAULT_FORMAT } from "./constants";
-import type { Granularity, NoteConfig, Settings } from "./types";
+import {
+  type Granularity,
+  granularities,
+  type NoteConfig,
+  type Settings,
+} from "./types";
 
 export function getFormat(
   settings: Settings,
@@ -30,6 +35,10 @@ export function getConfig(
   granularity: Granularity,
 ): NoteConfig {
   return settings.granularities[granularity];
+}
+
+export function getEnabledGranularities(settings: Settings): Granularity[] {
+  return granularities.filter((g) => settings.granularities[g].enabled);
 }
 
 export function removeEscapedCharacters(format: string): string {
@@ -72,6 +81,14 @@ export function validateFormat(
   return "";
 }
 
+function isMissingRequiredTokens(format: string): boolean {
+  const base = getBasename(format).replace(/\[[^\]]*\]/g, "");
+  return (
+    !["M", "D"].every((t) => base.includes(t)) ||
+    !(base.includes("Y") || base.includes("y"))
+  );
+}
+
 export function validateFormatComplexity(
   format: string,
   granularity: Granularity,
@@ -82,16 +99,7 @@ export function validateFormatComplexity(
 
   const strippedFormat = removeEscapedCharacters(format);
   if (strippedFormat.includes("/")) {
-    if (
-      granularity === "day" &&
-      (() => {
-        const base = getBasename(format).replace(/\[[^\]]*\]/g, "");
-        return (
-          !["M", "D"].every((t) => base.includes(t)) ||
-          !(base.includes("Y") || base.includes("y"))
-        );
-      })()
-    ) {
+    if (granularity === "day" && isMissingRequiredTokens(format)) {
       return "fragile-basename";
     }
   }

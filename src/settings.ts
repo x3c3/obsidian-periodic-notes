@@ -3,7 +3,7 @@ import { DEFAULT_FORMAT } from "./constants";
 import { FileSuggest, FolderSuggest } from "./fileSuggest";
 import { validateFormat } from "./format";
 import type PeriodicNotesPlugin from "./main";
-import type { Granularity } from "./types";
+import { type Granularity, granularities } from "./types";
 
 function validateTemplate(app: App, template: string): string {
   if (!template) return "";
@@ -37,12 +37,7 @@ export class SettingsTab extends PluginSettingTab {
     const { containerEl } = this;
     containerEl.empty();
 
-    for (const granularity of [
-      "day",
-      "week",
-      "month",
-      "year",
-    ] as Granularity[]) {
+    for (const granularity of granularities) {
       this.addGranularitySection(containerEl, granularity);
     }
   }
