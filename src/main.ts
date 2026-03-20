@@ -111,11 +111,10 @@ export default class PeriodicNotesPlugin extends Plugin {
   private configureRibbonIcons(): void {
     this.ribbonEl?.detach();
 
-    const enabled = granularities.filter(
+    const granularity = granularities.find(
       (g) => this.settings.granularities[g].enabled,
     );
-    if (enabled.length) {
-      const granularity = enabled[0];
+    if (granularity) {
       const label = granularityLabels[granularity];
       this.ribbonEl = this.addRibbonIcon(
         `calendar-${granularity}`,

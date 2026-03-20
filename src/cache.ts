@@ -10,8 +10,9 @@ import {
   TFolder,
 } from "obsidian";
 
-import { DEFAULT_FORMAT } from "./constants";
 import {
+  getEnabledGranularities,
+  getFormat,
   getPossibleFormats,
   removeEscapedCharacters,
   validateFormatComplexity,
@@ -107,9 +108,7 @@ export class NoteCache extends Component {
       }
     };
 
-    const active = granularities.filter(
-      (g) => settings.granularities[g].enabled,
-    );
+    const active = getEnabledGranularities(settings);
     for (const granularity of active) {
       const folder = settings.granularities[granularity].folder || "/";
       const rootFolder = this.app.vault.getAbstractFileByPath(folder);
@@ -131,23 +130,19 @@ export class NoteCache extends Component {
     cache: CachedMetadata,
   ): void {
     const settings = this.plugin.settings;
-    const active = granularities.filter(
-      (g) => settings.granularities[g].enabled,
-    );
+    const active = getEnabledGranularities(settings);
     if (active.length === 0) return;
 
     for (const granularity of active) {
-      const folder = settings.granularities[granularity].folder || "";
-      if (!file.path.startsWith(folder)) continue;
+      const folder = settings.granularities[granularity].folder || "/";
+      if (!file.path.startsWith(folder === "/" ? "" : folder)) continue;
       const frontmatterEntry = parseFrontMatterEntry(
         cache.frontmatter,
         granularity,
       );
       if (!frontmatterEntry) continue;
 
-      const format =
-        settings.granularities[granularity].format ||
-        DEFAULT_FORMAT[granularity];
+      const format = getFormat(settings, granularity);
       if (typeof frontmatterEntry === "string") {
         const date = window.moment(frontmatterEntry, format, true);
         if (date.isValid()) {
@@ -175,17 +170,15 @@ export class NoteCache extends Component {
     reason: "create" | "rename" | "initialize" = "create",
   ): void {
     const settings = this.plugin.settings;
-    const active = granularities.filter(
-      (g) => settings.granularities[g].enabled,
-    );
+    const active = getEnabledGranularities(settings);
     if (active.length === 0) return;
 
     const existing = this.byPath.get(file.path);
     if (existing && existing.match === "frontmatter") return;
 
     for (const granularity of active) {
-      const folder = settings.granularities[granularity].folder || "";
-      if (!file.path.startsWith(folder)) continue;
+      const folder = settings.granularities[granularity].folder || "/";
+      if (!file.path.startsWith(folder === "/" ? "" : folder)) continue;
 
       const formats = getPossibleFormats(settings, granularity);
       const dateInputStr = getDateInput(file, formats[0], granularity);
