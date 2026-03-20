@@ -1,5 +1,27 @@
 # Changelog
 
+## 1.5.0
+
+### Bug Fixes
+
+- Fix stale cache entries after deleting periodic notes (#86)
+- Fix nested folder creation in ensureFolderExists (#88)
+- Fix frontmatter parsing ignoring user-configured date format (#87)
+- Fix case-sensitive Moment.js token validation in format complexity check (#84)
+- Fix setIcon race condition in settings Arrow.svelte (#82)
+- Consolidate asymmetric template path guard in getTemplateContents (#89)
+
+### Refactoring
+
+- Extract shared WEEKDAYS constant, eliminating duplication across three files (#91)
+- Replace duplicate KEY_FORMATS with shared DEFAULT_FORMAT constant (#78)
+- Remove unused \_app parameter from showFileMenu (#92)
+- Remove redundant this.plugin assignment in PeriodicNotesSettingsTab (#83)
+
+### Documentation
+
+- Add inline comments explaining store counter and subscription bridge patterns (#90)
+
 ## 1.4.0
 
 ### Features
