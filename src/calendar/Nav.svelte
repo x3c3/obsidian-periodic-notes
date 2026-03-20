@@ -4,9 +4,9 @@
   import type { Writable } from "svelte/store";
 
   import Arrow from "./Arrow.svelte";
-  import { DISPLAYED_MONTH } from "./context";
+  import { DISPLAYED_MONTH } from "src/constants";
   import Month from "./Month.svelte";
-  import type { FileMap, IEventHandlers } from "./types";
+  import type { FileMap, EventHandlers } from "./types";
 
   let {
     fileMap,
@@ -15,7 +15,7 @@
   }: {
     fileMap: FileMap;
     today: Moment;
-    eventHandlers: IEventHandlers;
+    eventHandlers: EventHandlers;
   } = $props();
 
   let displayedMonth = getContext<Writable<Moment>>(DISPLAYED_MONTH);

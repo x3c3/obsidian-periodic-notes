@@ -3,10 +3,10 @@
   import { getContext } from "svelte";
   import type { Writable } from "svelte/store";
 
-  import { isMetaPressed } from "src/utils";
-  import { DISPLAYED_MONTH } from "./context";
-  import { fileMapKey } from "./fileStore";
-  import type { FileMap, IEventHandlers } from "./types";
+  import { isMetaPressed } from "./utils";
+  import { DISPLAYED_MONTH } from "src/constants";
+  import { fileMapKey } from "./store";
+  import type { FileMap, EventHandlers } from "./types";
 
   let {
     date,
@@ -19,9 +19,9 @@
   }: {
     date: Moment;
     fileMap: FileMap;
-    onHover: IEventHandlers["onHover"];
-    onClick: IEventHandlers["onClick"];
-    onContextMenu: IEventHandlers["onContextMenu"];
+    onHover: EventHandlers["onHover"];
+    onClick: EventHandlers["onClick"];
+    onContextMenu: EventHandlers["onContextMenu"];
     today: Moment;
     activeFilePath: string | null;
   } = $props();

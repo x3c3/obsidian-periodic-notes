@@ -1,5 +1,6 @@
 import type { Moment } from "moment";
-import type { IMonth, IWeek } from "./types";
+import { Platform } from "obsidian";
+import type { Month, Week } from "./types";
 
 export function getWeekdayLabels(): string[] {
   return window.moment.weekdaysShort(true);
@@ -13,9 +14,9 @@ export function getStartOfWeek(days: Moment[]): Moment {
   return days[0].clone();
 }
 
-export function getMonth(displayedMonth: Moment): IMonth {
-  const month: IMonth = [];
-  let week!: IWeek;
+export function getMonth(displayedMonth: Moment): Month {
+  const month: Month = [];
+  let week!: Week;
 
   const startOfMonth = displayedMonth.clone().date(1);
   const startOffset = startOfMonth.weekday();
@@ -35,4 +36,8 @@ export function getMonth(displayedMonth: Moment): IMonth {
   }
 
   return month;
+}
+
+export function isMetaPressed(e: MouseEvent | KeyboardEvent): boolean {
+  return Platform.isMacOS ? e.metaKey : e.ctrlKey;
 }

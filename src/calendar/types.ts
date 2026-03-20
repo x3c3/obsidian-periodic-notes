@@ -2,14 +2,14 @@ import type { Moment } from "moment";
 import type { TFile } from "obsidian";
 import type { Granularity } from "src/types";
 
-export interface IWeek {
+export interface Week {
   days: Moment[];
   weekNum: number;
 }
 
-export type IMonth = IWeek[];
+export type Month = Week[];
 
-export interface IEventHandlers {
+export interface EventHandlers {
   onHover: (
     granularity: Granularity,
     date: Moment,
