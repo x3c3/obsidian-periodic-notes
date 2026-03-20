@@ -1,33 +1,85 @@
-# Periodic Notes Plugin Walkthrough
+# Periodic Notes Walkthrough
 
-*2026-03-20T21:28:58Z by Showboat 0.6.1*
-<!-- showboat-id: f1aa29cb-e7fb-4ee9-92e3-7e68095f1e9a -->
+*2026-03-19T18:38:12Z by Showboat 0.6.1*
+<!-- showboat-id: 8c0c6b2b-9cc6-4dd8-a9d2-066f06aa362f -->
 
 ## Overview
 
-Periodic Notes is an Obsidian plugin that creates and manages daily, weekly, monthly, quarterly, and yearly notes. It provides a sidebar calendar view, command palette integration, and template-based note creation.
+Periodic Notes is an Obsidian plugin that creates and manages daily, weekly, monthly,
+quarterly, and yearly notes. It provides:
+
+- Configurable filename formats, folders, and templates per granularity
+- A sidebar calendar view built with Svelte 5
+- Commands to open, navigate, and create periodic notes
+- A cache that indexes notes by parsing filenames, frontmatter, and loose date patterns
+- Locale-aware week numbering via Moment.js
 
 **Key technologies:** TypeScript, Svelte 5, Vite, Moment.js, Obsidian Plugin API
 
-**Entry point:** `src/main.ts` — exports `PeriodicNotesPlugin`, the Obsidian `Plugin` subclass
-
 ## Architecture
 
-The plugin is organized into these modules:
+The plugin is organized into four main areas:
 
-- `src/main.ts` — Plugin lifecycle, settings, ribbon, commands
-- `src/cache.ts` — Resolves files to periodic note metadata (date, granularity, match type)
-- `src/utils.ts` — Note creation, template rendering, path utilities
-- `src/parser.ts` — Date parsing from filenames
-- `src/commands.ts` — Command palette registration
-- `src/constants.ts` — Default formats, weekday names
-- `src/calendar/` — Svelte 5 sidebar calendar (view, fileStore, components)
-- `src/settings/` — Settings UI, validation, localization
-
-## Entry Point: Plugin Lifecycle
+| Directory | Purpose |
+|-----------|---------|
+| `src/` (root) | Plugin entry point, cache, commands, types, utilities |
+| `src/calendar/` | Svelte 5 sidebar calendar with reactive file store |
+| `src/settings/` | Settings UI with validation, localization |
+| `src/ui/` | Shared UI components (file suggest) |
 
 ```bash
-sed -n '1,50p' src/main.ts
+find src -name '*.ts' -o -name '*.svelte' | grep -v node_modules | grep -v test | grep -v '.d.ts' | sort
+```
+
+```output
+src/cache.ts
+src/calendar/Arrow.svelte
+src/calendar/Calendar.svelte
+src/calendar/constants.ts
+src/calendar/context.ts
+src/calendar/Day.svelte
+src/calendar/fileStore.ts
+src/calendar/Month.svelte
+src/calendar/Nav.svelte
+src/calendar/types.ts
+src/calendar/utils.ts
+src/calendar/view.ts
+src/calendar/WeekNum.svelte
+src/commands.ts
+src/constants.ts
+src/icons.ts
+src/main.ts
+src/modal.ts
+src/parser.ts
+src/settings/components/Arrow.svelte
+src/settings/components/Dropdown.svelte
+src/settings/components/Footer.svelte
+src/settings/components/NoteFolderSetting.svelte
+src/settings/components/NoteFormatSetting.svelte
+src/settings/components/NoteTemplateSetting.svelte
+src/settings/components/OpenAtStartupSetting.svelte
+src/settings/components/SettingItem.svelte
+src/settings/components/Toggle.svelte
+src/settings/index.ts
+src/settings/localization.ts
+src/settings/pages/dashboard/GettingStartedBanner.svelte
+src/settings/pages/details/PeriodicGroup.svelte
+src/settings/pages/SettingsPage.svelte
+src/settings/utils.ts
+src/settings/validation.ts
+src/types.ts
+src/ui/fileSuggest.ts
+src/utils.ts
+```
+
+## Entry Point — Plugin Lifecycle
+
+`src/main.ts` defines `PeriodicNotesPlugin`, which orchestrates all subsystems.
+On load it registers icons, creates a settings store, initializes the cache,
+registers the calendar view and commands, and configures ribbon icons.
+
+```bash
+sed -n '1,15p' src/main.ts
 ```
 
 ```output
@@ -46,50 +98,16 @@ import {
   calendarQuarterIcon,
   calendarWeekIcon,
   calendarYearIcon,
-} from "./icons";
-import { showFileMenu } from "./modal";
-import {
-  DEFAULT_SETTINGS,
-  PeriodicNotesSettingsTab,
-  type Settings,
-} from "./settings";
-import { initializeLocaleConfigOnce } from "./settings/localization";
-import {
-  findStartupNoteConfig,
-  getEnabledGranularities,
-} from "./settings/utils";
-import { type Granularity, granularities } from "./types";
-import {
-  applyTemplateTransformations,
-  getConfig,
-  getFormat,
-  getNoteCreationPath,
-  getTemplateContents,
-  isMetaPressed,
-} from "./utils";
-
-interface OpenOpts {
-  inNewSplit?: boolean;
-}
-
-export default class PeriodicNotesPlugin extends Plugin {
-  public settings!: Writable<Settings>;
-  private ribbonEl!: HTMLElement | null;
-
-  private cache!: PeriodicNotesCache;
-
-  async onload(): Promise<void> {
-    addIcon("calendar-day", calendarDayIcon);
-    addIcon("calendar-week", calendarWeekIcon);
 ```
 
-The plugin registers custom icons, loads settings from disk into a Svelte writable store, initializes the locale configuration, then sets up the cache, calendar view, settings tab, ribbon icons, and commands. It also opens a startup note if configured.
-
 ```bash
-sed -n '51,100p' src/main.ts
+sed -n '48,97p' src/main.ts
 ```
 
 ```output
+  async onload(): Promise<void> {
+    addIcon("calendar-day", calendarDayIcon);
+    addIcon("calendar-week", calendarWeekIcon);
     addIcon("calendar-month", calendarMonthIcon);
     addIcon("calendar-quarter", calendarQuarterIcon);
     addIcon("calendar-year", calendarYearIcon);
@@ -137,14 +155,135 @@ sed -n '51,100p' src/main.ts
       }
     });
   }
-
-  private configureRibbonIcons() {
-    this.ribbonEl?.detach();
 ```
 
-## Constants and Types
+The `onload` lifecycle:
 
-The plugin defines five granularities and their default date formats. The `WEEKDAYS` constant and `WeekdayName` type are shared across modules.
+1. Register 5 custom SVG icons (one per granularity)
+2. Create a Svelte writable store for settings; load saved data
+3. Subscribe to settings changes via `onUpdateSettings`
+4. Configure Moment.js locale once (weekStart, language)
+5. Create `PeriodicNotesCache` to index files
+6. Register settings tab, ribbon icons, and commands
+7. Register `CalendarView` as an Obsidian `ItemView`
+8. On layout ready, open the startup note if configured
+
+## Settings Store and Persistence
+
+Settings are stored in a Svelte writable store, making them reactive across the
+calendar and settings UI. When settings change, `onUpdateSettings` saves to disk,
+reconfigures ribbon icons, and fires a workspace event to reset the cache.
+
+```bash
+sed -n '99,131p' src/main.ts
+```
+
+```output
+  private configureRibbonIcons() {
+    this.ribbonEl?.detach();
+
+    const configuredGranularities = getEnabledGranularities(get(this.settings));
+    if (configuredGranularities.length) {
+      const granularity = configuredGranularities[0];
+      const config = displayConfigs[granularity];
+      this.ribbonEl = this.addRibbonIcon(
+        `calendar-${granularity}`,
+        config.labelOpenPresent,
+        (e: MouseEvent) => {
+          if (e.type !== "auxclick") {
+            this.openPeriodicNote(granularity, window.moment(), {
+              inNewSplit: isMetaPressed(e),
+            });
+          }
+        },
+      );
+      this.ribbonEl.addEventListener("contextmenu", (e: MouseEvent) => {
+        e.preventDefault();
+        showFileMenu(this, {
+          x: e.pageX,
+          y: e.pageY,
+        });
+      });
+    }
+  }
+
+  private configureCommands() {
+    for (const granularity of granularities) {
+      getCommands(this.app, this, granularity).forEach(
+        this.addCommand.bind(this),
+      );
+```
+
+```bash
+sed -n '135,167p' src/main.ts
+```
+
+```output
+  async loadSettings(): Promise<void> {
+    const savedSettings = await this.loadData();
+    const settings = Object.assign({}, DEFAULT_SETTINGS, savedSettings || {});
+
+    if (
+      !settings.day &&
+      !settings.week &&
+      !settings.month &&
+      !settings.quarter &&
+      !settings.year
+    ) {
+      settings.day = { ...DEFAULT_PERIODIC_CONFIG, enabled: true };
+    }
+
+    this.settings.set(settings);
+  }
+
+  private async onUpdateSettings(newSettings: Settings): Promise<void> {
+    await this.saveData(newSettings);
+    this.configureRibbonIcons();
+    this.app.workspace.trigger("periodic-notes:settings-updated");
+  }
+
+  public async createPeriodicNote(
+    granularity: Granularity,
+    date: Moment,
+  ): Promise<TFile> {
+    const settings = get(this.settings);
+    const config = getConfig(settings, granularity);
+    const format = getFormat(settings, granularity);
+    const filename = date.format(format);
+    const templateContents = await getTemplateContents(
+      this.app,
+```
+
+## Types and Constants
+
+The `Granularity` type and `PeriodicConfig` interface define the core data model.
+Each granularity has an enable flag, format string, folder path, optional template,
+and startup-open toggle.
+
+```bash
+cat src/types.ts
+```
+
+```output
+export type Granularity = "day" | "week" | "month" | "quarter" | "year";
+
+export const granularities: Granularity[] = [
+  "day",
+  "week",
+  "month",
+  "quarter",
+  "year",
+];
+
+export interface PeriodicConfig {
+  enabled: boolean;
+  openAtStartup: boolean;
+
+  format: string;
+  folder: string;
+  templatePath?: string;
+}
+```
 
 ```bash
 cat src/constants.ts
@@ -192,37 +331,15 @@ export const HUMANIZE_FORMAT = Object.freeze({
 });
 ```
 
-```bash
-cat src/types.ts
-```
+## Cache — File Indexing and Lookup
 
-```output
-export type Granularity = "day" | "week" | "month" | "quarter" | "year";
-
-export const granularities: Granularity[] = [
-  "day",
-  "week",
-  "month",
-  "quarter",
-  "year",
-];
-
-export interface PeriodicConfig {
-  enabled: boolean;
-  openAtStartup: boolean;
-
-  format: string;
-  folder: string;
-  templatePath?: string;
-}
-```
-
-## Cache: File Resolution
-
-`PeriodicNotesCache` is the core data structure. It maps file paths to periodic note metadata (date, granularity, match type). Files are resolved by filename parsing, frontmatter dates, or date-prefix matching.
+`src/cache.ts` defines `PeriodicNotesCache`, the core indexing engine. It scans
+vault files, parses dates from filenames and frontmatter, and maintains a map of
+cached periodic notes. The cache uses three matching strategies in priority order:
+frontmatter (exact), filename parse (exact), and loose regex (fallback).
 
 ```bash
-sed -n '1,50p' src/cache.ts
+sed -n '1,30p' src/cache.ts
 ```
 
 ```output
@@ -256,33 +373,15 @@ interface PeriodicNoteMatchData {
 function compareGranularity(a: Granularity, b: Granularity) {
   const idxA = granularities.indexOf(a);
   const idxB = granularities.indexOf(b);
-  if (idxA === idxB) return 0;
-  if (idxA < idxB) return -1;
-  return 1;
-}
-
-export interface PeriodicNoteCachedMetadata {
-  filePath: string;
-  date: Moment;
-  granularity: Granularity;
-  canonicalDateStr: string;
-  matchData: PeriodicNoteMatchData;
-}
-
-function getCanonicalDateString(
-  _granularity: Granularity,
-  date: Moment,
-): string {
-  return date.toISOString();
-}
-
 ```
 
 ```bash
-sed -n '51,86p' src/cache.ts
+sed -n '49,125p' src/cache.ts
 ```
 
 ```output
+}
+
 export class PeriodicNotesCache extends Component {
   public cachedFiles: Map<string, PeriodicNoteCachedMetadata>;
 
@@ -319,17 +418,24 @@ export class PeriodicNotesCache extends Component {
       );
     });
   }
-```
 
-The cache registers handlers for vault events: `create`, `delete`, `rename`, and metadata changes. On `delete`, entries are immediately evicted. On settings change, the entire cache resets.
+  public reset(): void {
+    console.info("[Periodic Notes] resetting cache");
+    this.cachedFiles.clear();
+    this.initialize();
+  }
 
-The `resolve` method is the main entry point for classifying a file. It tries filename parsing first, then falls back to frontmatter and date-prefix matching.
-
-```bash
-sed -n '105,200p' src/cache.ts
-```
-
-```output
+  public initialize(): void {
+    const settings = get(this.plugin.settings);
+    const visited = new Set<TFolder>();
+    const recurseChildren = (
+      folder: TFolder,
+      cb: (file: TAbstractFile) => void,
+    ) => {
+      if (visited.has(folder)) return;
+      visited.add(folder);
+      for (const c of folder.children) {
+        if (c instanceof TFile) {
           cb(c);
         } else if (c instanceof TFolder) {
           recurseChildren(c, cb);
@@ -351,7 +457,13 @@ sed -n '105,200p' src/cache.ts
         if (file instanceof TFile) {
           this.resolve(file, "initialize");
           const metadata = this.app.metadataCache.getFileCache(file);
-          if (metadata) {
+```
+
+```bash
+sed -n '127,215p' src/cache.ts
+```
+
+```output
             this.resolveChangedMetadata(file, "", metadata);
           }
         }
@@ -426,14 +538,6 @@ sed -n '105,200p' src/cache.ts
     for (const granularity of activeGranularities) {
       const folder = settings[granularity]?.folder || "";
       if (!file.path.startsWith(folder)) continue;
-```
-
-```bash
-sed -n '200,275p' src/cache.ts
-```
-
-```output
-      if (!file.path.startsWith(folder)) continue;
 
       const formats = getPossibleFormats(settings, granularity);
       const dateInputStr = getDateInput(file, formats[0], granularity);
@@ -448,6 +552,14 @@ sed -n '200,275p' src/cache.ts
             exact: true,
             matchType: "filename",
           },
+        } as PeriodicNoteCachedMetadata;
+```
+
+```bash
+sed -n '215,290p' src/cache.ts
+```
+
+```output
         } as PeriodicNoteCachedMetadata;
         this.set(file.path, metadata);
 
@@ -509,11 +621,39 @@ sed -n '200,275p' src/cache.ts
     return null;
   }
 
+  public getPeriodicNotes(
+    granularity: Granularity,
+    targetDate: Moment,
+    includeFinerGranularities = false,
+  ): PeriodicNoteCachedMetadata[] {
+    const matches: PeriodicNoteCachedMetadata[] = [];
+    for (const [, cacheData] of this.cachedFiles) {
+      if (
+        (granularity === cacheData.granularity ||
+          (includeFinerGranularities &&
+            compareGranularity(cacheData.granularity, granularity) <= 0)) &&
+        cacheData.date.isSame(targetDate, granularity)
+      ) {
+        matches.push(cacheData);
+      }
 ```
 
-The resolve chain: filename parsing → frontmatter → loose date prefix. On `create` events for empty files, the cache automatically applies the configured template. `getPeriodicNote` does a linear scan (see issue #85 for planned O(1) index).
+The cache lifecycle:
 
-## Parser: Date Extraction from Filenames
+1. **Initialize** — On layout ready, scan enabled granularity folders recursively
+2. **Resolve** — For each file, try frontmatter → filename → loose parse
+3. **React** — Listen to vault create/rename, metadataCache changed, settings-updated
+4. **Lookup** — `getPeriodicNote()` finds exact matches; `getPeriodicNotes()` supports finer granularities
+5. **Template** — On new file creation (size === 0), apply template transformations
+
+Stale entries are evicted during lookup: if the file no longer exists in the vault,
+the entry is deleted and the loop continues searching.
+
+## Parser — Loose Date Matching
+
+`src/parser.ts` provides `getLooselyMatchedDate()`, which uses regex patterns
+to extract dates from filenames that don't match any configured format exactly.
+This enables the calendar to show files with non-standard names.
 
 ```bash
 cat src/parser.ts
@@ -575,12 +715,15 @@ export function getLooselyMatchedDate(inputStr: string): ParseData | null {
 }
 ```
 
-`parser.ts` has zero `obsidian` imports — it's the model for pure modules that can be tested directly. It extracts dates from filenames using three progressively looser regex patterns: full date → month → year.
+## Template System
 
-## Utils: Note Creation and Template Rendering
+`src/utils.ts` handles file creation and template variable replacement.
+`getTemplateContents()` reads the template file, then `applyTemplateTransformations()`
+replaces variables like `{{date}}`, `{{title}}`, `{{yesterday}}`, `{{tomorrow}}`,
+time-based tokens, and offset expressions like `{{date+1d:YYYY-MM-DD}}`.
 
 ```bash
-sed -n '1,18p' src/utils.ts
+sed -n '1,20p' src/utils.ts
 ```
 
 ```output
@@ -602,13 +745,25 @@ import {
 } from "./constants";
 import type { Settings } from "./settings";
 import { removeEscapedCharacters } from "./settings/validation";
+import type { Granularity, PeriodicConfig } from "./types";
+
 ```
 
 ```bash
-sed -n '60,130p' src/utils.ts
+sed -n '50,137p' src/utils.ts
 ```
 
 ```output
+  const pattern = new RegExp(
+    `{{\\s*(${tokenPattern})\\s*(([-+]\\d+)([yqmwdhs]))?\\s*(:.+?)?}}`,
+    "gi",
+  );
+  const now = window.moment();
+  return contents.replace(
+    pattern,
+    (_, _token, calc, timeDelta, unit, momentFormat) => {
+      const periodStart = date.clone();
+      if (startOfUnit) {
         periodStart.startOf(startOfUnit);
       }
       periodStart.set({
@@ -680,24 +835,20 @@ export function applyTemplateTransformations(
 
   return templateContents;
 }
+
+export function getFormat(
+  settings: Settings,
+  granularity: Granularity,
+): string {
+  return settings[granularity]?.format || DEFAULT_FORMAT[granularity];
+}
 ```
 
-Template rendering replaces `{{date}}`, `{{time}}`, `{{title}}`, `{{yesterday}}`, `{{tomorrow}}`, weekday tokens (`{{sunday:format}}`), and granularity delta tokens. The `WEEKDAYS` constant drives the weekday regex.
-
-### Note Creation Path
-
 ```bash
-sed -n '195,275p' src/utils.ts
+sed -n '202,236p' src/utils.ts
 ```
 
 ```output
-export async function getTemplateContents(
-  app: App,
-  templatePath: string | undefined,
-  granularity: Granularity,
-): Promise<string> {
-  if (!templatePath || templatePath === "/") {
-    return "";
   }
   const { metadataCache, vault } = app;
   const normalizedTemplatePath = normalizePath(templatePath);
@@ -733,53 +884,21 @@ export async function getNoteCreationPath(
   return path;
 }
 
-// Credit: @creationix/path.js
-export function join(...partSegments: string[]): string {
-  // Split the inputs into a list of path commands.
-  let parts: string[] = [];
-  for (let i = 0, l = partSegments.length; i < l; i++) {
-    parts = parts.concat(partSegments[i].split("/"));
-  }
-  // Interpret the path commands to get the new resolved path.
-  const newParts = [];
-  for (let i = 0, l = parts.length; i < l; i++) {
-    const part = parts[i];
-    // Remove leading and trailing slashes
-    // Also remove "." segments
-    if (!part || part === ".") continue;
-    // Push new path segments.
-    else newParts.push(part);
-  }
-  // Preserve the initial slash if there was one.
-  if (parts[0] === "") newParts.unshift("");
-  // Turn back into a single string path.
-  return newParts.join("/");
-}
-
-async function ensureFolderExists(app: App, path: string): Promise<void> {
-  const dirs = path.replace(/\\/g, "/").split("/");
-  dirs.pop(); // remove basename
-
-  let current = "";
-  for (const dir of dirs) {
-    current = current ? `${current}/${dir}` : dir;
-    if (!app.vault.getAbstractFileByPath(current)) {
-      await app.vault.createFolder(current);
-    }
-  }
-}
-
-export function getRelativeDate(granularity: Granularity, date: Moment) {
-  if (granularity === "week") {
-    const thisWeek = window.moment().startOf(granularity);
 ```
 
-`getTemplateContents` guards against empty/`"/"` paths before resolving the template file. `ensureFolderExists` walks directory segments one at a time, creating each level — `vault.createFolder()` is not recursive.
+`replaceGranularityTokens()` is the shared workhorse for day, month, quarter, and
+year offsets. The regex captures an optional delta (e.g. `+1d`) and an optional
+format suffix (e.g. `:YYYY-MM-DD`). Week templates use a separate branch that
+maps weekday names to `date.weekday(n).format()`.
 
 ## Commands
 
+`src/commands.ts` generates five commands per granularity: open current,
+jump next/previous (navigate within existing notes), and open next/previous
+(create if missing). Commands are only registered for enabled granularities.
+
 ```bash
-sed -n '1,67p' src/commands.ts
+sed -n '1,60p' src/commands.ts
 ```
 
 ```output
@@ -843,23 +962,26 @@ async function jumpToAdjacentNote(
     }
   } else {
     const qualifier = direction === "forwards" ? "after" : "before";
-    new Notice(
-      `There's no ${
-        displayConfigs[activeFileMeta.granularity].periodicity
-      } note ${qualifier} this`,
-    );
-  }
-}
 ```
-
-Each granularity gets 5 commands: open current, jump forward/backward to closest existing note, and open (create) next/previous note. `getCommands()` is a factory that takes a granularity parameter.
 
 ## Calendar View
 
-The sidebar calendar is a Svelte 5 application mounted inside an Obsidian `ItemView`.
+The calendar sidebar is a Svelte 5 application mounted in an Obsidian `ItemView`.
+`CalendarView` (src/calendar/view.ts) creates a `CalendarFileStore` and mounts
+`Calendar.svelte`, passing callback props for hover, click, and context menu events.
+
+### Reactivity Bridge
+
+The Svelte/Obsidian boundary requires careful handling:
+
+- **View → Component**: `CalendarView` calls exported functions `tick()` and
+  `setActiveFilePath()` on the Svelte component
+- **Component → View**: Svelte calls callback props (`onHover`, `onClick`, `onContextMenu`)
+- **Store bridge**: `$derived.by()` does NOT track Svelte store auto-subscriptions,
+  so `$state` + `$effect` + `.subscribe()` is used instead
 
 ```bash
-sed -n '1,70p' src/calendar/view.ts
+sed -n '1,80p' src/calendar/view.ts
 ```
 
 ```output
@@ -933,13 +1055,25 @@ export class CalendarView extends ItemView {
     targetEl: EventTarget,
     metaPressed: boolean,
   ): void {
+    if (!metaPressed) return;
+    const formattedDate = date.format(
+      granularity === "day"
+        ? "YYYY-MM-DD"
+        : date.localeData().longDateFormat("L"),
+    );
+    this.app.workspace.trigger(
+      "link-hover",
+      this,
+      targetEl,
 ```
 
-`CalendarView` mounts the Svelte `Calendar` component and communicates bidirectionally:
-- **View → Svelte:** Exported functions `tick()` and `setActiveFilePath()` (validated at mount)
-- **Svelte → View:** Callback props `onHover`, `onClick`, `onContextMenu`
+### FileStore — Bridging Vault Events to Svelte
 
-### FileStore: Reactivity Bridge
+`CalendarFileStore` wraps a simple numeric counter store. Vault events
+increment the counter (filtered via `isPeriodic()`), which triggers
+Svelte reactivity. The `computeFileMap()` function pre-computes a
+`Map<string, TFile | null>` for the displayed month, so child components
+do cheap `$derived` lookups via `fileMapKey()`.
 
 ```bash
 cat src/calendar/fileStore.ts
@@ -1057,14 +1191,183 @@ export function computeFileMap(
 }
 ```
 
-The `CalendarFileStore` uses a counter-bump `Writable<number>` as a notification mechanism. The store value is meaningless — bumping it triggers Svelte subscribers to re-read plugin state. This works around the Svelte 5 limitation that `$derived.by()` doesn't track Svelte store auto-subscriptions.
+### Calendar Components
 
-`computeFileMap` pre-computes a `Map<string, TFile | null>` for all visible cells in a month. Child components do `$derived` lookups via `fileMapKey()` — no per-cell subscriptions.
-
-## Settings and Validation
+The component hierarchy: `Calendar.svelte` → `Nav.svelte` + day/week table.
+`Nav.svelte` contains `Month.svelte` (clickable title) and `Arrow.svelte` buttons.
+Each table cell is a `Day.svelte` or `WeekNum.svelte` that derives its file
+from the pre-computed fileMap.
 
 ```bash
-sed -n '1,30p' src/settings/index.ts
+sed -n '1,80p' src/calendar/Calendar.svelte
+```
+
+```output
+<script lang="ts">
+  import type { Moment } from "moment";
+  import { setContext } from "svelte";
+  import { writable } from "svelte/store";
+
+  import { DISPLAYED_MONTH } from "./context";
+  import Day from "./Day.svelte";
+  import type CalendarFileStore from "./fileStore";
+  import { computeFileMap, fileMapKey } from "./fileStore";
+  import Nav from "./Nav.svelte";
+  import type { FileMap, IEventHandlers, IMonth } from "./types";
+  import { getMonth, getWeekdayLabels, isWeekend } from "./utils";
+  import WeekNum from "./WeekNum.svelte";
+
+  let {
+    fileStore,
+    onHover,
+    onClick,
+    onContextMenu,
+  }: {
+    fileStore: CalendarFileStore;
+    onHover: IEventHandlers["onHover"];
+    onClick: IEventHandlers["onClick"];
+    onContextMenu: IEventHandlers["onContextMenu"];
+  } = $props();
+
+  let activeFilePath: string | null = $state(null);
+
+  let today: Moment = $state.raw(window.moment());
+
+  const displayedMonthStore = writable<Moment>(window.moment());
+  setContext(DISPLAYED_MONTH, displayedMonthStore);
+
+  let month: IMonth = $state.raw(getMonth(window.moment()));
+  let showWeekNums: boolean = $state(false);
+  let fileMap: FileMap = $state.raw(new Map());
+
+  $effect(() => {
+    month = getMonth($displayedMonthStore);
+  });
+
+  // $derived.by() doesn't track Svelte store subscriptions,
+  // so we manually subscribe inside $effect and return the unsubscribe.
+  $effect(() => {
+    const currentMonth = month;
+    return fileStore.store.subscribe(() => {
+      showWeekNums = fileStore.isGranularityEnabled("week");
+      fileMap = computeFileMap(
+        currentMonth,
+        (date, granularity) => fileStore.getFile(date, granularity),
+        fileStore.getEnabledGranularities(),
+      );
+    });
+  });
+
+  let eventHandlers: IEventHandlers = $derived({
+    onHover,
+    onClick,
+    onContextMenu,
+  });
+
+  const daysOfWeek: string[] = getWeekdayLabels();
+
+  export function tick() {
+    const now = window.moment();
+    if (!now.isSame(today, "day")) {
+      today = now;
+    }
+  }
+
+  export function setActiveFilePath(path: string | null) {
+    activeFilePath = path;
+  }
+</script>
+
+<div id="calendar-container" class="container">
+  <Nav {fileMap} {today} {eventHandlers} />
+  <table class="calendar">
+    <colgroup>
+      {#if showWeekNums}
+```
+
+```bash
+sed -n '80,140p' src/calendar/Calendar.svelte
+```
+
+```output
+      {#if showWeekNums}
+        <col />
+      {/if}
+      {#each month[1].days as date}
+        <col class:weekend={isWeekend(date)} />
+      {/each}
+    </colgroup>
+    <thead>
+      <tr>
+        {#if showWeekNums}
+          <th>W</th>
+        {/if}
+        {#each daysOfWeek as dayOfWeek}
+          <th>{dayOfWeek}</th>
+        {/each}
+      </tr>
+    </thead>
+    <tbody>
+      {#each month as week (fileMapKey("week", week.days[0]))}
+        <tr>
+          {#if showWeekNums}
+            <WeekNum
+              {fileMap}
+              {activeFilePath}
+              {...week}
+              {...eventHandlers}
+            />
+          {/if}
+          {#each week.days as day (day.format())}
+            <Day
+              date={day}
+              {fileMap}
+              {today}
+              {activeFilePath}
+              {...eventHandlers}
+            />
+          {/each}
+        </tr>
+      {/each}
+    </tbody>
+  </table>
+</div>
+
+<style>
+  .container {
+    --color-background-heading: transparent;
+    --color-background-day: transparent;
+    --color-background-weeknum: transparent;
+    --color-background-weekend: transparent;
+
+    --color-arrow: var(--text-muted);
+    --color-button: var(--text-muted);
+
+    --color-text-title: var(--text-normal);
+    --color-text-heading: var(--text-muted);
+    --color-text-day: var(--text-normal);
+    --color-text-today: var(--interactive-accent);
+    --color-text-weeknum: var(--text-muted);
+  }
+
+  .container {
+```
+
+Key reactivity pattern in Calendar.svelte: the `$effect` block subscribes to
+`fileStore.store` (a numeric counter) using `.subscribe()`, not `$derived.by()`.
+This is necessary because `$derived.by()` does not track Svelte store
+auto-subscriptions. When vault events increment the counter, the effect
+recomputes the fileMap.
+
+## Settings UI
+
+The settings tab mounts `SettingsPage.svelte`, which renders a
+`PeriodicGroup.svelte` for each granularity. Each group has a toggle,
+format input with validation feedback, folder picker, template picker,
+and open-at-startup toggle.
+
+```bash
+cat src/settings/index.ts
 ```
 
 ```output
@@ -1098,10 +1401,36 @@ export class PeriodicNotesSettingsTab extends PluginSettingTab {
   ) {
     super(app, plugin);
   }
+
+  display(): void {
+    this.containerEl.empty();
+
+    this.view = mount(SettingsPage, {
+      target: this.containerEl,
+      props: {
+        app: this.app,
+        settings: this.plugin.settings,
+      },
+    });
+  }
+
+  hide() {
+    super.hide();
+    if (this.view) {
+      unmount(this.view);
+    }
+  }
+}
 ```
 
+### Validation
+
+`src/settings/validation.ts` validates format strings, folder paths, and template
+paths. It also detects "fragile" formats where the basename alone doesn't uniquely
+parse (e.g., `YYYY/YYYY-MM-DD` where the date part lives in a subfolder path).
+
 ```bash
-sed -n '1,50p' src/settings/validation.ts
+sed -n '1,65p' src/settings/validation.ts
 ```
 
 ```output
@@ -1155,13 +1484,14 @@ export function validateFormat(
     const testFormattedDate = window.moment().format(format);
     const parsedDate = window.moment(testFormattedDate, format, true);
 
-```
+    if (!parsedDate.isValid()) {
+      return "Failed to parse format";
+    }
+  }
 
-```bash
-sed -n '59,90p' src/settings/validation.ts
-```
+  return "";
+}
 
-```output
 export function validateFormatComplexity(
   format: string,
   granularity: Granularity,
@@ -1169,150 +1499,64 @@ export function validateFormatComplexity(
   const testFormattedDate = window.moment().format(format);
   const parsedDate = window.moment(testFormattedDate, format, true);
   if (!parsedDate.isValid()) {
-    return "loose-parsing";
-  }
-
-  const strippedFormat = removeEscapedCharacters(format);
-  if (strippedFormat.includes("/")) {
-    if (
-      granularity === "day" &&
-      (() => {
-        const base = getBasename(format).replace(/\[[^\]]*\]/g, "");
-        return (
-          !["M", "D"].every((t) => base.includes(t)) ||
-          !(base.includes("Y") || base.includes("y"))
-        );
-      })()
-    ) {
-      return "fragile-basename";
-    }
-  }
-
-  return "valid";
-}
-
-export function getDateInput(
-  file: TFile,
-  format: string,
 ```
 
-`validateFormatComplexity` checks that date formats are unambiguous. The `fragile-basename` check uses case-sensitive Moment.js tokens (`M` for month, `D` for day-of-month) to avoid conflating with minutes (`m`) or day-of-week (`d`).
+### Localization
 
-## Localization
+`src/settings/localization.ts` configures Moment.js locale and week start day.
+It reads Obsidian's private API (`vault.getConfig("localeOverride")` and
+`vault.getConfig("weekStart")`) in a try-catch, mapping Obsidian language codes
+to Moment.js locale identifiers. A bundled locale week spec is cached on
+`window._bundledLocaleWeekSpec` for fallback.
 
 ```bash
-sed -n '1,15p' src/settings/localization.ts
+sed -n '100,160p' src/settings/localization.ts
 ```
 
 ```output
-import type { WeekSpec } from "moment";
-import type { App } from "obsidian";
-
-import type { WeekdayName } from "../constants";
-import { WEEKDAYS } from "../constants";
-
-declare global {
-  interface Window {
-    _bundledLocaleWeekSpec: WeekSpec;
-    _hasConfiguredLocale: boolean;
-  }
-}
-
-type LocaleOverride = "system-default" | string;
-
-```
-
-```bash
-sed -n '57,100p' src/settings/localization.ts
-```
-
-```output
-      dow: localeData.firstDayOfWeek(),
-      doy: localeData.firstDayOfYear(),
-    };
-  }
-
-  if (weekStart === "locale") {
-    moment.updateLocale(currentLocale, {
-      week: window._bundledLocaleWeekSpec,
-    });
-  } else {
-    moment.updateLocale(currentLocale, {
-      week: {
-        dow: Math.max(0, WEEKDAYS.indexOf(weekStart as WeekdayName)),
-      },
-    });
-  }
-}
-
-/**
- * Sets the locale used by the calendar. This allows the calendar to
- * default to the user's locale (e.g. Start Week on Sunday/Monday/Friday)
- *
- * @param localeOverride locale string (e.g. "en-US")
- */
-export function configureGlobalMomentLocale(
-  localeOverride: LocaleOverride = "system-default",
-  weekStart: WeekStartOption = "locale",
-): string {
-  const obsidianLang = localStorage.getItem("language") || "en";
-  const systemLang = navigator.language?.toLowerCase();
-
-  let momentLocale = langToMomentLocale[obsidianLang];
-
-  if (localeOverride !== "system-default") {
-    momentLocale = localeOverride;
-  } else if (systemLang?.startsWith(obsidianLang)) {
-    // If the system locale is more specific (en-gb vs en), use the system locale.
-    momentLocale = systemLang;
-  }
-
-  const currentLocale = window.moment.locale(momentLocale);
-  console.debug(
-    `[Periodic Notes] Trying to switch Moment.js global locale to ${momentLocale}, got ${currentLocale}`,
   );
-```
 
-The localization module configures Moment.js's global locale and week start day. It reads Obsidian's language setting and maps it to a Moment locale. This module is slated for removal (issue #100).
+  overrideGlobalMomentWeekStart(weekStart);
 
-## Context Menu
+  return currentLocale;
+}
 
-```bash
-cat src/modal.ts
-```
+export function initializeLocaleConfigOnce(app: App) {
+  if (window._hasConfiguredLocale) {
+    return;
+  }
 
-```output
-import { Menu, type Point } from "obsidian";
-import { get } from "svelte/store";
-import { displayConfigs } from "./commands";
-import type PeriodicNotesPlugin from "./main";
-import { getEnabledGranularities } from "./settings/utils";
+  const localization = getLocalizationSettings(app);
+  const { localeOverride, weekStart } = localization;
 
-export function showFileMenu(
-  plugin: PeriodicNotesPlugin,
-  position: Point,
-): void {
-  const contextMenu = new Menu();
+  configureGlobalMomentLocale(localeOverride, weekStart);
 
-  getEnabledGranularities(get(plugin.settings)).forEach((granularity) => {
-    const config = displayConfigs[granularity];
-    contextMenu.addItem((item) =>
-      item
-        .setTitle(config.labelOpenPresent)
-        .setIcon(`calendar-${granularity}`)
-        .onClick(() => {
-          plugin.openPeriodicNote(granularity, window.moment());
-        }),
+  window._hasConfiguredLocale = true;
+}
+
+export function getLocalizationSettings(app: App): LocalizationSettings {
+  try {
+    // private API: vault.getConfig is undocumented
+    const localeOverride =
+      app.vault.getConfig("localeOverride") ?? "system-default";
+    const weekStart = app.vault.getConfig("weekStart") ?? "locale";
+    return { localeOverride, weekStart };
+  } catch (e) {
+    console.debug(
+      "[Periodic Notes] vault.getConfig() unavailable, using defaults",
+      e,
     );
-  });
-
-  contextMenu.showAtPosition(position);
+    return { localeOverride: "system-default", weekStart: "locale" };
+  }
 }
 ```
 
-The ribbon icon's right-click context menu shows one item per enabled granularity, each opening the current period's note.
+## Build System
 
-## Build Configuration
+Vite builds from `src/main.ts` to `./main.js` in CommonJS format. The build
+externalizes `obsidian`, `electron`, `fs`, `os`, and `path`. A custom plugin
+copies the CSS output to `styles.css` in the project root. The `emptyOutDir`
+flag is `false` to prevent Vite from clearing the project root.
 
 ```bash
 cat vite.config.ts
@@ -1354,17 +1598,84 @@ export default defineConfig({
 });
 ```
 
-Vite builds to the project root (`outDir: "."`) as a CommonJS library. Obsidian, electron, and Node builtins are externalized. The `src` path alias resolves to `src/`. `emptyOutDir: false` is critical — never change this, as the project root contains source files.
+## Testing
+
+Tests use Bun's built-in test runner. A preload script (`src/test-preload.ts`)
+provides `window.moment` globally. Test files re-implement pure functions to
+avoid importing modules that depend on `obsidian`. Modules that cannot be
+imported in tests: `cache.ts`, `utils.ts`, `settings/validation.ts`.
+
+```bash
+cat src/test-preload.ts
+```
+
+```output
+import moment from "moment";
+
+// @ts-expect-error partial window mock for test environment
+globalThis.window = {
+  moment,
+  _bundledLocaleWeekSpec: { dow: 0, doy: 6 },
+};
+```
+
+```bash
+grep -c 'test(' src/*.test.ts src/**/*.test.ts 2>/dev/null | grep -v ':0$'
+```
+
+```output
+src/cache.test.ts:25
+src/parser.test.ts:11
+src/utils.test.ts:63
+src/settings/localization.test.ts:12
+src/settings/utils.test.ts:11
+src/settings/validation.test.ts:27
+```
+
+```bash
+grep -c 'test(' src/*.test.ts src/**/*.test.ts 2>/dev/null | awk -F: '{s+=$2} END {print s " tests across " NR " files"}'
+```
+
+```output
+149 tests across 8 files
+```
+
+Note: `grep -c 'test('` counts test declarations statically (149), while
+`bun test` reports 159 because some tests are generated dynamically via
+`test.each()` or similar patterns.
 
 ## Concerns
 
-1. **Cache linear scan** — `getPeriodicNote()` iterates the entire cache on every call (~50 times per calendar render). A secondary index would make this O(1). (Issue #85)
+### Open Technical Debt (GitHub Issues)
 
-2. **Test drift risk** — Test files re-implement pure functions to avoid `obsidian` imports. Changes to source functions may not be reflected in test copies. (Issue #93)
+- **#93** — Test files re-implement source functions, risking drift between
+  test copies and production code
+- **#92** — Unused `_app` parameter in `showFileMenu`
+- **#91** — Weekday name array duplicated in three files
+- **#90** — Undocumented store counter and subscription bridge patterns
+- **#89** — Asymmetric template path guard in `getTemplateContents`
 
-3. **Legacy Svelte stores** — The counter-bump store pattern works but is a workaround for Svelte 5's runes not tracking store subscriptions. A full migration to runes would simplify the reactivity model. (Issue #102)
+### Code Quality Observations
 
-4. **Localization module** — Slated for removal. The locale configuration and week-start settings add complexity for minimal user value. (Issue #100)
+1. **a11y warnings**: `Month.svelte` has two `a11y_no_noninteractive_tabindex`
+   warnings (lines 87, 107) for non-interactive `<span>` elements with `tabIndex`.
+   These spans are functionally interactive (clickable month/year labels) but use
+   `<span>` instead of `<button>`, which is an a11y anti-pattern.
 
-5. **`canonicalDateStr` is broken** — `getCanonicalDateString()` ignores its granularity parameter, making the field useless for indexing. Part of the #85 fix.
+2. **Cache linear scan**: `getPeriodicNote()` iterates the entire `cachedFiles`
+   map on every lookup. For vaults with thousands of periodic notes this could
+   become a bottleneck. A secondary index by `canonicalDateStr` would improve
+   lookup to O(1).
 
+3. **Private API usage**: `vault.getConfig()` is undocumented and could break
+   in any Obsidian update. The try-catch is appropriate but the fallback behavior
+   should be documented for users.
+
+4. **Template path asymmetry (#89)**: `getTemplateContents()` guards against
+   `templatePath === "/"` but not other invalid paths like empty string. The
+   normalization via `normalizePath()` handles some cases but the guard is
+   inconsistent.
+
+5. **Test isolation**: Test files cannot import modules with `obsidian` dependencies,
+   so they re-implement functions locally (#93). This creates maintenance risk
+   when the source implementation changes but the test copy doesn't.
