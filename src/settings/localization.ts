@@ -1,6 +1,9 @@
 import type { WeekSpec } from "moment";
 import type { App } from "obsidian";
 
+import type { WeekdayName } from "../constants";
+import { WEEKDAYS } from "../constants";
+
 declare global {
   interface Window {
     _bundledLocaleWeekSpec: WeekSpec;
@@ -10,15 +13,7 @@ declare global {
 
 type LocaleOverride = "system-default" | string;
 
-export type WeekStartOption =
-  | "sunday"
-  | "monday"
-  | "tuesday"
-  | "wednesday"
-  | "thursday"
-  | "friday"
-  | "saturday"
-  | "locale";
+export type WeekStartOption = WeekdayName | "locale";
 
 const langToMomentLocale: Record<string, string> = {
   en: "en-gb",
@@ -44,16 +39,6 @@ const langToMomentLocale: Record<string, string> = {
   ar: "ar",
   ja: "ja",
 };
-
-const weekdays = [
-  "sunday",
-  "monday",
-  "tuesday",
-  "wednesday",
-  "thursday",
-  "friday",
-  "saturday",
-];
 
 export interface LocalizationSettings {
   localeOverride: LocaleOverride;
@@ -81,7 +66,7 @@ function overrideGlobalMomentWeekStart(weekStart: WeekStartOption): void {
   } else {
     moment.updateLocale(currentLocale, {
       week: {
-        dow: Math.max(0, weekdays.indexOf(weekStart)),
+        dow: Math.max(0, WEEKDAYS.indexOf(weekStart as WeekdayName)),
       },
     });
   }

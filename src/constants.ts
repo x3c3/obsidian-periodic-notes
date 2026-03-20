@@ -20,6 +20,18 @@ export const DEFAULT_PERIODIC_CONFIG = Object.freeze({
   folder: "",
 });
 
+export const WEEKDAYS = [
+  "sunday",
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday",
+] as const;
+
+export type WeekdayName = (typeof WEEKDAYS)[number];
+
 export const HUMANIZE_FORMAT = Object.freeze({
   month: "MMMM YYYY",
   quarter: "YYYY Q[Q]",
