@@ -151,7 +151,8 @@ export class PeriodicNotesCache extends Component {
       );
       if (!frontmatterEntry) continue;
 
-      const format = DEFAULT_FORMAT[granularity];
+      const format =
+        settings[granularity]?.format || DEFAULT_FORMAT[granularity];
       if (typeof frontmatterEntry === "string") {
         const date = window.moment(frontmatterEntry, format, true);
         if (date.isValid()) {
