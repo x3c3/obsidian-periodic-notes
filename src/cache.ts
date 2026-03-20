@@ -12,7 +12,6 @@ import {
 
 import { DEFAULT_FORMAT } from "./constants";
 import {
-  getBasename,
   getPossibleFormats,
   removeEscapedCharacters,
   validateFormatComplexity,
