@@ -12,6 +12,7 @@ import {
   DEFAULT_FORMAT,
   DEFAULT_PERIODIC_CONFIG,
   HUMANIZE_FORMAT,
+  WEEKDAYS,
 } from "./constants";
 import type { Settings } from "./settings";
 import { removeEscapedCharacters } from "./settings/validation";
@@ -24,15 +25,7 @@ export function isMetaPressed(e: MouseEvent | KeyboardEvent): boolean {
 function getDaysOfWeek(): string[] {
   const { moment } = window;
   let weekStart = moment.localeData().firstDayOfWeek();
-  const daysOfWeek = [
-    "sunday",
-    "monday",
-    "tuesday",
-    "wednesday",
-    "thursday",
-    "friday",
-    "saturday",
-  ];
+  const daysOfWeek = [...WEEKDAYS];
 
   while (weekStart) {
     const day = daysOfWeek.shift();
@@ -111,7 +104,7 @@ export function applyTemplateTransformations(
 
   if (granularity === "week") {
     templateContents = templateContents.replace(
-      /{{\s*(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\s*:(.*?)}}/gi,
+      new RegExp(`{{\\s*(${WEEKDAYS.join("|")})\\s*:(.*?)}}`, "gi"),
       (_, dayOfWeek, momentFormat) => {
         const day = getDayOfWeekNumericalValue(dayOfWeek);
         return date.weekday(day).format(momentFormat.trim());

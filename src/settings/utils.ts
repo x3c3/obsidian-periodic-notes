@@ -1,4 +1,5 @@
 import type { App, DailyNotesPlugin } from "obsidian";
+import { WEEKDAYS } from "src/constants";
 import { type Granularity, granularities } from "src/types";
 import { get, type Updater, type Writable } from "svelte/store";
 import type { Settings } from ".";
@@ -62,20 +63,11 @@ export function getLocaleOptions() {
 }
 
 export function getWeekStartOptions() {
-  const weekdays = [
-    "sunday",
-    "monday",
-    "tuesday",
-    "wednesday",
-    "thursday",
-    "friday",
-    "saturday",
-  ];
   const localizedWeekdays = window.moment.weekdays();
   const localeWeekStartNum = window._bundledLocaleWeekSpec.dow;
   const localeWeekStart = localizedWeekdays[localeWeekStartNum];
   return [
     { label: `Locale default (${localeWeekStart})`, value: "locale" },
-    ...localizedWeekdays.map((day, i) => ({ value: weekdays[i], label: day })),
+    ...localizedWeekdays.map((day, i) => ({ value: WEEKDAYS[i], label: day })),
   ];
 }
