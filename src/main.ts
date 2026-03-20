@@ -50,7 +50,7 @@ const langToMomentLocale: Record<string, string> = {
 function configureLocale(): void {
   const obsidianLang = localStorage.getItem("language") || "en";
   const systemLang = navigator.language?.toLowerCase();
-  let momentLocale = langToMomentLocale[obsidianLang];
+  let momentLocale = langToMomentLocale[obsidianLang] ?? obsidianLang;
   if (systemLang?.startsWith(obsidianLang)) {
     momentLocale = systemLang;
   }
@@ -144,9 +144,18 @@ export default class PeriodicNotesPlugin extends Plugin {
 
   async loadSettings(): Promise<void> {
     const saved = await this.loadData();
-    this.settings = saved?.granularities
-      ? saved
-      : structuredClone(DEFAULT_SETTINGS);
+    const settings = structuredClone(DEFAULT_SETTINGS);
+    if (saved?.granularities) {
+      for (const g of granularities) {
+        if (saved.granularities[g]) {
+          settings.granularities[g] = {
+            ...settings.granularities[g],
+            ...saved.granularities[g],
+          };
+        }
+      }
+    }
+    this.settings = settings;
   }
 
   public async saveSettings(): Promise<void> {

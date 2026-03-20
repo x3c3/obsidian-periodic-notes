@@ -208,12 +208,18 @@ export class NoteCache extends Component {
   }
 
   private set(entry: CacheEntry): void {
-    const old = this.byPath.get(entry.filePath);
-    if (old) {
-      this.byKey.delete(canonicalKey(old.granularity, old.date));
+    const oldByPath = this.byPath.get(entry.filePath);
+    if (oldByPath) {
+      this.byKey.delete(canonicalKey(oldByPath.granularity, oldByPath.date));
+    }
+    const key = canonicalKey(entry.granularity, entry.date);
+    // Evict any other file that claims the same canonical key
+    const oldByKey = this.byKey.get(key);
+    if (oldByKey && oldByKey.filePath !== entry.filePath) {
+      this.byPath.delete(oldByKey.filePath);
     }
     this.byPath.set(entry.filePath, entry);
-    this.byKey.set(canonicalKey(entry.granularity, entry.date), entry);
+    this.byKey.set(key, entry);
   }
 
   private remove(filePath: string): void {

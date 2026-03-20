@@ -75,27 +75,33 @@ export class SettingsTab extends PluginSettingTab {
           });
       });
 
-    new Setting(containerEl).setName("Folder").addText((text) => {
-      text.setValue(config.folder);
-      new FolderSuggest(this.app, text.inputEl, async (value) => {
-        const error = validateFolder(this.app, value);
-        if (!error) {
-          this.plugin.settings.granularities[granularity].folder = value;
-          await this.plugin.saveSettings();
-        }
+    const folderSetting = new Setting(containerEl)
+      .setName("Folder")
+      .addText((text) => {
+        text.setValue(config.folder).onChange(async (value) => {
+          const error = validateFolder(this.app, value);
+          folderSetting.descEl.setText(error || "");
+          folderSetting.descEl.toggleClass("has-error", !!error);
+          if (!error) {
+            this.plugin.settings.granularities[granularity].folder = value;
+            await this.plugin.saveSettings();
+          }
+        });
+        new FolderSuggest(this.app, text.inputEl);
       });
-    });
 
-    new Setting(containerEl).setName("Template").addText((text) => {
-      text.setValue(config.templatePath ?? "");
-      new FileSuggest(this.app, text.inputEl, async (value) => {
-        const error = validateTemplate(this.app, value);
-        if (!error) {
+    const templateSetting = new Setting(containerEl)
+      .setName("Template")
+      .addText((text) => {
+        text.setValue(config.templatePath ?? "").onChange(async (value) => {
+          const error = validateTemplate(this.app, value);
+          templateSetting.descEl.setText(error || "");
+          templateSetting.descEl.toggleClass("has-error", !!error);
           this.plugin.settings.granularities[granularity].templatePath =
             value || undefined;
           await this.plugin.saveSettings();
-        }
+        });
+        new FileSuggest(this.app, text.inputEl);
       });
-    });
   }
 }
