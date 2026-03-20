@@ -1,16 +1,21 @@
-import { type App, type Command, Notice, TFile } from "obsidian";
-import { get } from "svelte/store";
+import {
+  type App,
+  type Command,
+  Menu,
+  Notice,
+  type Point,
+  TFile,
+} from "obsidian";
 import type PeriodicNotesPlugin from "./main";
+import { type Granularity, granularities } from "./types";
 
-import type { Granularity } from "./types";
-
-interface DisplayConfig {
+interface GranularityLabel {
   periodicity: string;
   relativeUnit: string;
   labelOpenPresent: string;
 }
 
-export const displayConfigs: Record<Granularity, DisplayConfig> = {
+export const granularityLabels: Record<Granularity, GranularityLabel> = {
   day: {
     periodicity: "daily",
     relativeUnit: "today",
@@ -26,11 +31,6 @@ export const displayConfigs: Record<Granularity, DisplayConfig> = {
     relativeUnit: "this month",
     labelOpenPresent: "Open this month's note",
   },
-  quarter: {
-    periodicity: "quarterly",
-    relativeUnit: "this quarter",
-    labelOpenPresent: "Open this quarter's note",
-  },
   year: {
     periodicity: "yearly",
     relativeUnit: "this year",
@@ -45,13 +45,12 @@ async function jumpToAdjacentNote(
 ): Promise<void> {
   const activeFile = app.workspace.getActiveFile();
   if (!activeFile) return;
-  const activeFileMeta = plugin.findInCache(activeFile.path);
-  if (!activeFileMeta) return;
+  const meta = plugin.findInCache(activeFile.path);
+  if (!meta) return;
 
-  const adjacentNoteMeta = plugin.findAdjacent(activeFile.path, direction);
-
-  if (adjacentNoteMeta) {
-    const file = app.vault.getAbstractFileByPath(adjacentNoteMeta.filePath);
+  const adjacent = plugin.findAdjacent(activeFile.path, direction);
+  if (adjacent) {
+    const file = app.vault.getAbstractFileByPath(adjacent.filePath);
     if (file && file instanceof TFile) {
       const leaf = app.workspace.getLeaf();
       await leaf.openFile(file, { active: true });
@@ -59,9 +58,7 @@ async function jumpToAdjacentNote(
   } else {
     const qualifier = direction === "forwards" ? "after" : "before";
     new Notice(
-      `There's no ${
-        displayConfigs[activeFileMeta.granularity].periodicity
-      } note ${qualifier} this`,
+      `There's no ${granularityLabels[meta.granularity].periodicity} note ${qualifier} this`,
     );
   }
 }
@@ -73,23 +70,12 @@ async function openAdjacentNote(
 ): Promise<void> {
   const activeFile = app.workspace.getActiveFile();
   if (!activeFile) return;
-  const activeFileMeta = plugin.findInCache(activeFile.path);
-  if (!activeFileMeta) return;
+  const meta = plugin.findInCache(activeFile.path);
+  if (!meta) return;
 
   const offset = direction === "forwards" ? 1 : -1;
-  const adjacentDate = activeFileMeta.date
-    .clone()
-    .add(offset, activeFileMeta.granularity);
-
-  plugin.openPeriodicNote(activeFileMeta.granularity, adjacentDate);
-}
-
-function isGranularityActive(
-  plugin: PeriodicNotesPlugin,
-  granularity: Granularity,
-): boolean {
-  const settings = get(plugin.settings);
-  return settings[granularity]?.enabled === true;
+  const adjacentDate = meta.date.clone().add(offset, meta.granularity);
+  plugin.openPeriodicNote(meta.granularity, adjacentDate);
 }
 
 export function getCommands(
@@ -97,26 +83,23 @@ export function getCommands(
   plugin: PeriodicNotesPlugin,
   granularity: Granularity,
 ): Command[] {
-  const config = displayConfigs[granularity];
+  const label = granularityLabels[granularity];
 
   return [
     {
-      id: `open-${config.periodicity}-note`,
-      name: config.labelOpenPresent,
+      id: `open-${label.periodicity}-note`,
+      name: label.labelOpenPresent,
       checkCallback: (checking: boolean) => {
-        if (!isGranularityActive(plugin, granularity)) return false;
-        if (checking) {
-          return true;
-        }
+        if (!plugin.settings.granularities[granularity].enabled) return false;
+        if (checking) return true;
         plugin.openPeriodicNote(granularity, window.moment());
       },
     },
-
     {
-      id: `next-${config.periodicity}-note`,
-      name: `Jump forwards to closest ${config.periodicity} note`,
+      id: `next-${label.periodicity}-note`,
+      name: `Jump forwards to closest ${label.periodicity} note`,
       checkCallback: (checking: boolean) => {
-        if (!isGranularityActive(plugin, granularity)) return false;
+        if (!plugin.settings.granularities[granularity].enabled) return false;
         const activeFile = app.workspace.getActiveFile();
         if (checking) {
           if (!activeFile) return false;
@@ -126,10 +109,10 @@ export function getCommands(
       },
     },
     {
-      id: `prev-${config.periodicity}-note`,
-      name: `Jump backwards to closest ${config.periodicity} note`,
+      id: `prev-${label.periodicity}-note`,
+      name: `Jump backwards to closest ${label.periodicity} note`,
       checkCallback: (checking: boolean) => {
-        if (!isGranularityActive(plugin, granularity)) return false;
+        if (!plugin.settings.granularities[granularity].enabled) return false;
         const activeFile = app.workspace.getActiveFile();
         if (checking) {
           if (!activeFile) return false;
@@ -139,10 +122,10 @@ export function getCommands(
       },
     },
     {
-      id: `open-next-${config.periodicity}-note`,
-      name: `Open next ${config.periodicity} note`,
+      id: `open-next-${label.periodicity}-note`,
+      name: `Open next ${label.periodicity} note`,
       checkCallback: (checking: boolean) => {
-        if (!isGranularityActive(plugin, granularity)) return false;
+        if (!plugin.settings.granularities[granularity].enabled) return false;
         const activeFile = app.workspace.getActiveFile();
         if (checking) {
           if (!activeFile) return false;
@@ -152,10 +135,10 @@ export function getCommands(
       },
     },
     {
-      id: `open-prev-${config.periodicity}-note`,
-      name: `Open previous ${config.periodicity} note`,
+      id: `open-prev-${label.periodicity}-note`,
+      name: `Open previous ${label.periodicity} note`,
       checkCallback: (checking: boolean) => {
-        if (!isGranularityActive(plugin, granularity)) return false;
+        if (!plugin.settings.granularities[granularity].enabled) return false;
         const activeFile = app.workspace.getActiveFile();
         if (checking) {
           if (!activeFile) return false;
@@ -165,4 +148,26 @@ export function getCommands(
       },
     },
   ];
+}
+
+export function showContextMenu(
+  plugin: PeriodicNotesPlugin,
+  position: Point,
+): void {
+  const menu = new Menu();
+  const enabled = granularities.filter(
+    (g) => plugin.settings.granularities[g].enabled,
+  );
+
+  for (const granularity of enabled) {
+    const label = granularityLabels[granularity];
+    menu.addItem((item) =>
+      item
+        .setTitle(label.labelOpenPresent)
+        .setIcon(`calendar-${granularity}`)
+        .onClick(() => plugin.openPeriodicNote(granularity, window.moment())),
+    );
+  }
+
+  menu.showAtPosition(position);
 }
