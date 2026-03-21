@@ -79,13 +79,11 @@ export class SettingsTab extends PluginSettingTab {
       .setName("Folder")
       .addText((text) => {
         text.setValue(config.folder).onChange(async (value) => {
-          const error = validateFolder(this.app, value);
-          folderSetting.descEl.setText(error || "");
-          folderSetting.descEl.toggleClass("has-error", !!error);
-          if (!error) {
-            this.plugin.settings.granularities[granularity].folder = value;
-            await this.plugin.saveSettings();
-          }
+          const warning = validateFolder(this.app, value);
+          folderSetting.descEl.setText(warning || "");
+          folderSetting.descEl.toggleClass("has-error", !!warning);
+          this.plugin.settings.granularities[granularity].folder = value;
+          await this.plugin.saveSettings();
         });
         new FolderSuggest(this.app, text.inputEl);
       });
