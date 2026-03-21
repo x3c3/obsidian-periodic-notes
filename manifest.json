@@ -3,7 +3,7 @@
   "name": "Periodic Notes",
   "version": "2.0.0",
   "minAppVersion": "1.6.0",
-  "description": "Create and manage daily, weekly, monthly, quarterly, and yearly notes",
+  "description": "Create and manage daily, weekly, monthly, and yearly notes",
   "author": "Mark Ayers (originally by Liam Cain)",
   "authorUrl": "https://github.com/philoserf",
   "isDesktopOnly": false
