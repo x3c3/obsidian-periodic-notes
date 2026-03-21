@@ -84,6 +84,7 @@
 
 <div>
   <span class="title">
+    <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
     <span
       class="month"
       class:clickable={monthEnabled}
@@ -104,6 +105,7 @@
     >
       {$displayedMonth.format("MMM")}
     </span>
+    <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
     <span
       class="year"
       class:clickable={yearEnabled}
