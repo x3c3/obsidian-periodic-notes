@@ -143,17 +143,17 @@ sed -n '148,158p' src/main.ts
 ```
 
 ```output
-    this.settings = saved?.granularities
-      ? saved
-      : structuredClone(DEFAULT_SETTINGS);
-  }
-
-  public async saveSettings(): Promise<void> {
-    await this.saveData(this.settings);
-    this.configureRibbonIcons();
-    this.app.workspace.trigger("periodic-notes:settings-updated");
-  }
-
+    if (saved?.granularities) {
+      for (const g of granularities) {
+        if (saved.granularities[g]) {
+          settings.granularities[g] = {
+            ...settings.granularities[g],
+            ...saved.granularities[g],
+          };
+        }
+      }
+    }
+    this.settings = settings;
 ```
 
 No migration — if saved data doesn't have the v2 shape, defaults are used. `saveSettings` triggers a workspace event that the cache and calendar store listen to.
@@ -165,6 +165,7 @@ sed -n '26,86p' src/cache.ts
 ```
 
 ```output
+function canonicalKey(granularity: Granularity, date: Moment): string {
   return `${granularity}:${date.clone().startOf(granularity).toISOString()}`;
 }
 
@@ -225,7 +226,6 @@ export class NoteCache extends Component {
         ),
       );
     });
-  }
 ```
 
 `NoteCache` uses dual maps: `byPath` (filePath → CacheEntry) and `byKey` (canonicalKey → CacheEntry). The `canonicalKey` is `${granularity}:${date.startOf(granularity).toISOString()}` — granularity-aware and ISO-sortable. `getPeriodicNote` is O(1) via `byKey`:
@@ -235,7 +235,6 @@ sed -n '232,245p' src/cache.ts
 ```
 
 ```output
-  }
 
   public getPeriodicNote(
     granularity: Granularity,
@@ -249,6 +248,7 @@ sed -n '232,245p' src/cache.ts
     this.remove(entry.filePath);
     return null;
   }
+
 ```
 
 ## Template Rendering
@@ -313,7 +313,12 @@ sed -n '1,30p' src/format.ts
 
 ```output
 import { DEFAULT_FORMAT } from "./constants";
-import type { Granularity, NoteConfig, Settings } from "./types";
+import {
+  type Granularity,
+  granularities,
+  type NoteConfig,
+  type Settings,
+} from "./types";
 
 export function getFormat(
   settings: Settings,
@@ -337,11 +342,6 @@ export function getPossibleFormats(
     return [format, partialFormat];
   }
   return [format];
-}
-
-export function getConfig(
-  settings: Settings,
-  granularity: Granularity,
 ```
 
 ## Commands and Context Menu
@@ -383,10 +383,6 @@ sed -n '49,75p' src/settings.ts
 ```
 
 ```output
-  private addGranularitySection(
-    containerEl: HTMLElement,
-    granularity: Granularity,
-  ): void {
     const config = this.plugin.settings.granularities[granularity];
 
     containerEl.createEl("h3", { text: labels[granularity] });
@@ -402,14 +398,18 @@ sed -n '49,75p' src/settings.ts
       .setName("Format")
       .setDesc("Moment.js date format string")
       .addText((text) => {
-        text.setValue(config.format).onChange(async (value) => {
-          const error = validateFormat(value, granularity);
-          formatSetting.descEl.setText(error || "Moment.js date format string");
-          formatSetting.descEl.toggleClass("has-error", !!error);
-          this.plugin.settings.granularities[granularity].format = value;
-          await this.plugin.saveSettings();
-        });
-      });
+        text
+          .setPlaceholder(DEFAULT_FORMAT[granularity])
+          .setValue(config.format)
+          .onChange(async (value) => {
+            const error = validateFormat(value, granularity);
+            formatSetting.descEl.setText(
+              error || "Moment.js date format string",
+            );
+            formatSetting.descEl.toggleClass("has-error", !!error);
+            this.plugin.settings.granularities[granularity].format = value;
+            await this.plugin.saveSettings();
+          });
 ```
 
 ## Calendar View
@@ -521,4 +521,3 @@ Vite builds to project root as CJS. `output.exports: "default"` means only the d
 3. **`isMetaPressed` lives in `platform.ts`** — A separate file for one function. This exists because `main.ts` can only have a default export (vite constraint) and `calendar/utils.ts` can't import from obsidian without breaking its tests. A Vite config change to allow named exports would let this move back to main.ts.
 
 4. **No integration tests for cache resolution** — The cache is tested at the unit level (key generation, entry shape) but `resolve()` requires Obsidian's file system. Consider a thin mock layer for TFile.
-
